@@ -1,0 +1,377 @@
+/* Asosiy rang o'zgaruvchilari */
+:root {
+    --primary-color: #1976d2;
+    --secondary-color: #4caf50;
+    --accent-color: #ff9800;
+    --danger-color: #e53935;
+    --info-color: #03a9f4;
+    --light-gray: #f5f5f5;
+    --dark-gray: #455a64;
+}
+
+/* Asosiy stillar */
+body {
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    background-color: #87CEEB; /* Havo rang (sky blue) */
+    margin: 0; /* Standart marginni olib tashlash */
+    padding: 0; /* Standart paddingni olib tashlash */
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+}
+
+/* Navbar stillarini yaxshilash */
+.navbar {
+    padding: 12px 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    margin-right: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.navbar-brand img {
+    max-height: 40px;
+}
+
+.navbar-nav .nav-link {
+    font-weight: 500;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+}
+
+/* Foydalanuvchi profili */
+.navbar .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    background-color: #f0f0f0;
+    padding: 8px 15px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.navbar .dropdown-toggle:hover {
+    background-color: #e0e0e0;
+}
+
+.navbar .dropdown-toggle i {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+/* Card stillarini yaxshilash */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    margin-bottom: 25px;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.95); /* Konteynerlar uchun shaffof oq fon */
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    padding: 15px 20px;
+    font-weight: bold;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.card-footer {
+    padding: 15px 20px;
+    background-color: transparent;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Kart ikonka stillar */
+.card-header i {
+    font-size: 2.5rem;
+    margin: 10px 0;
+    transition: transform 0.3s ease;
+}
+
+.card:hover .card-header i {
+    transform: scale(1.1);
+}
+
+/* Tugmalar stillarini yaxshilash */
+.btn {
+    padding: 10px 18px;
+    border-radius: 5px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-success {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.btn-info {
+    background-color: var(--info-color);
+    border-color: var(--info-color);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+/* Rang variantlari */
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.bg-success {
+    background-color: var(--secondary-color) !important;
+}
+
+.bg-info {
+    background-color: var(--info-color) !important;
+}
+
+.bg-danger {
+    background-color: var(--danger-color) !important;
+}
+
+/* Footer stillar */
+footer {
+    background-color: var(--light-gray);
+    padding: 40px 0 20px;
+    margin-top: 40px;
+}
+
+footer h5 {
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: var(--dark-gray);
+}
+
+footer .list-unstyled li {
+    margin-bottom: 10px;
+}
+
+footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+footer a:hover {
+    color: var(--dark-gray);
+    text-decoration: underline;
+}
+
+/* Ijtimoiy tarmoq ikonkalari */
+.social-icons {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.social-icons a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.social-icons a:hover {
+    transform: translateY(-3px);
+    background-color: var(--dark-gray);
+}
+
+/* Krossvord stillar */
+.crossword-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.crossword-grid {
+    border: 2px solid #333;
+    margin-bottom: 20px;
+}
+
+.clues-section {
+    flex: 1;
+    min-width: 300px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    padding: 20px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.clue-title {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.clue-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.clue-item:hover {
+    background-color: #d1e1f1;
+    transform: translateX(5px);
+}
+
+.clue-item.active {
+    background-color: #e3f2fd;
+    border-left: 4px solid var(--primary-color);
+    font-weight: bold;
+}
+
+.clue-item.completed {
+    color: var(--secondary-color);
+    text-decoration: line-through;
+}
+
+/* So'z o'yini stillar */
+.word-game-container {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.word-box {
+    padding: 25px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+}
+
+.word-display {
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
+}
+
+.letter-box {
+    width: 55px;
+    height: 55px;
+    margin: 0 6px;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.letter-box.filled {
+    background-color: #d1e1f1;
+    transform: translateY(-3px);
+}
+
+/* Responsive stillar */
+@media (max-width: 768px) {
+    .navbar-brand {
+        margin-right: 0;
+    }
+    
+    .crossword-container {
+        flex-direction: column;
+    }
+    
+    .card {
+        margin-bottom: 15px;
+    }
+    
+    footer {
+        text-align: center;
+    }
+    
+    .footer .list-unstyled {
+        margin-bottom: 25px;
+    }
+    
+    .social-icons {
+        justify-content: center;
+    }
+}
+
+/* static/css/styles.css */
+/* Profil bloki uchun stillar */
+.profile-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 30px;
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.profile-image {
+    border: 5px solid #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.profile-image:hover {
+    transform: scale(1.05);
+}
+
+
+.card-hover {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
