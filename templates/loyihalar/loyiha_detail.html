@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>{{ project.title }}</h2>
+            <p class="text-muted">
+                <i class="fas fa-user me-1"></i> {{ project.student.get_full_name|default:project.student.username }}
+                <span class="mx-2">|</span>
+                <i class="fas fa-calendar me-1"></i> {{ project.created_at|date:"d.m.Y" }}
+                <span class="mx-2">|</span>
+                <span class="badge {% if project.status == 'draft' %}bg-secondary{% elif project.status == 'submitted' %}bg-primary{% elif project.status == 'reviewed' %}bg-info{% elif project.status == 'approved' %}bg-success{% else %}bg-danger{% endif %}">
+                    {{ project.get_status_display }}
+                </span>
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user == project.student %}
+                <div class="btn-group">
+                    {% if project.status == 'draft' or project.status == 'rejected' %}
+                    <a href="{% url 'loyiha_edit' project.id %}" class="btn btn-outline-primary">
+                        <i class="fas fa-edit me-1"></i> Tahrirlash
+                    </a>
+                    {% endif %}
+                    
+                    {% if project.status == 'draft' %}
+                    <a href="{% url 'loyiha_submit' project.id %}" class="btn btn-success">
+                        <i class="fas fa-paper-plane me-1"></i> Topshirish
+                    </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'loyiha_delete' project.id %}" class="btn btn-outline-danger">
+                        <i class="fas fa-trash me-1"></i> O'chirish
+                    </a>
+                </div>
+            {% elif user.profile.role == 'teacher' and project.status == 'submitted' %}
+                <a href="{% url 'loyiha_review' project.id %}" class="btn btn-primary">
+                    <i class="fas fa-check me-1"></i> Baholash
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Loyiha haqida</h5>
+                    <p class="card-text">{{ project.description|linebreaks }}</p>
+                </div>
+            </div>
+            
+            {% if project.status != 'draft' and project.feedback %}
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-comment me-2"></i> O'qituvchi fikr-mulohazasi</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ project.feedback|linebreaks }}</p>
+                    
+                    {% if project.grade %}
+                    <div class="alert alert-{% if project.grade >= 80 %}success{% elif project.grade >= 70 %}warning{% else %}danger{% endif %}">
+                        <strong>Baho: {{ project.grade }}/100</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            {% if project.file %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-file-alt me-2"></i> Loyiha fayli</h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if project.file.name|slice:"-3:" == 'pdf' %}
+                        <i class="fas fa-file-pdf fa-5x text-danger mb-3"></i>
+                    {% elif project.file.name|slice:"-3:" == 'doc' or project.file.name|slice:"-4:" == 'docx' %}
+                        <i class="fas fa-file-word fa-5x text-primary mb-3"></i>
+                    {% elif project.file.name|slice:"-3:" == 'ppt' or project.file.name|slice:"-4:" == 'pptx' %}
+                        <i class="fas fa-file-powerpoint fa-5x text-warning mb-3"></i>
+                    {% else %}
+                        <i class="fas fa-file fa-5x text-secondary mb-3"></i>
+                    {% endif %}
+                    
+                    <p>{{ project.file.name|slice:"9:" }}</p>
+                    <a href="{{ project.file.url }}" class="btn btn-primary" download>
+                        <i class="fas fa-download me-1"></i> Yuklab olish
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle me-2"></i> Qo'shimcha ma'lumot</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Yaratuvchi</span>
+                            <span>{{ project.student.get_full_name|default:project.student.username }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Yaratilgan sana</span>
+                            <span>{{ project.created_at|date:"d.m.Y" }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Oxirgi yangilanish</span>
+                            <span>{{ project.updated_at|date:"d.m.Y" }}</span>
+                        </li>
+                        {% if project.teacher %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Tekshiruvchi</span>
+                            <span>{{ project.teacher.get_full_name|default:project.teacher.username }}</span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

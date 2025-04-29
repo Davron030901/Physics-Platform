@@ -1,0 +1,565 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Krossvord o'yinlari{% endblock %}
+
+{% block extra_css %}
+<style>
+    .word-game-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .word-letter {
+        width: 40px;
+        height: 40px;
+        border: 1px solid #ddd;
+        display: inline-block;
+        font-size: 20px;
+        text-align: center;
+        margin: 4px;
+        line-height: 40px;
+        text-transform: uppercase;
+        font-weight: bold;
+        border-radius: 4px;
+    }
+    
+    .word-letter.correct {
+        background-color: #198754;
+        color: white;
+        border-color: #198754;
+    }
+    
+    .word-letter.wrong-position {
+        background-color: #ffc107;
+        color: black;
+        border-color: #ffc107;
+    }
+    
+    .word-letter.wrong {
+        background-color: #f8f9fa;
+        color: #212529;
+        border-color: #ddd;
+    }
+    
+    .letter-input {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        text-align: center;
+        margin: 4px;
+        text-transform: uppercase;
+        border-radius: 4px;
+    }
+    
+    .keyboard-container {
+        max-width: 500px;
+        margin: 20px auto;
+    }
+    
+    .keyboard-row {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 8px;
+    }
+    
+    .key {
+        width: 35px;
+        height: 45px;
+        margin: 0 2px;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e9ecef;
+        border: 1px solid #ced4da;
+    }
+    
+    .key:hover {
+        background-color: #dee2e6;
+    }
+    
+    .key.wide {
+        width: 65px;
+    }
+    
+    .key.correct {
+        background-color: #198754;
+        color: white;
+    }
+    
+    .key.wrong-position {
+        background-color: #ffc107;
+        color: black;
+    }
+    
+    .key.wrong {
+        background-color: #6c757d;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8 offset-md-2 text-center">
+            <h2>Fizika terminlari krossvord o'yini</h2>
+            <p class="lead">Fizika bo'yicha bilimingizni sinab ko'ring</p>
+        </div>
+    </div>
+    
+    {% if no_games %}
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Hozircha krossvord o'yinlari mavjud emas. Tez orada qo'shiladi.
+                </div>
+                
+                <!-- Ma'mur uchun qo'shish tugmachasi -->
+                {% if user.is_staff %}
+                    <div class="text-center mt-3">
+                        <a href="{% url 'admin:krossvord_wordgame_add' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Yangi krossvord qo'shish
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Savol: <span id="current-question">{{ game.question }}</span></h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="word-game-container text-center">
+                            <!-- So'z harflari konteyner -->
+                            <div id="word-container" class="mb-4">
+                                <!-- Bu yerda JavaScript orqali harflar yaratiladi -->
+                            </div>
+                            
+                            <!-- Javob kiritish formasi -->
+                            <div class="mb-4">
+                                <div class="mb-3 d-flex justify-content-center" id="input-container">
+                                    <!-- Bu yerda JavaScript orqali input maydonlari yaratiladi -->
+                                </div>
+                                <button id="check-button" class="btn btn-success">
+                                    <i class="fas fa-check me-1"></i> Tekshirish
+                                </button>
+                                <button id="clear-button" class="btn btn-outline-secondary ms-2">
+                                    <i class="fas fa-eraser me-1"></i> Tozalash
+                                </button>
+                                <button id="hint-button" class="btn btn-info ms-2">
+                                    <i class="fas fa-lightbulb me-1"></i> Yordam
+                                </button>
+                            </div>
+                            
+                            <!-- Onscreen klaviatura -->
+                            <div class="keyboard-container">
+                                <div class="keyboard-row">
+                                    <div class="key" data-key="й">Й</div>
+                                    <div class="key" data-key="ц">Ц</div>
+                                    <div class="key" data-key="у">У</div>
+                                    <div class="key" data-key="к">К</div>
+                                    <div class="key" data-key="е">Е</div>
+                                    <div class="key" data-key="н">Н</div>
+                                    <div class="key" data-key="г">Г</div>
+                                    <div class="key" data-key="ш">Ш</div>
+                                    <div class="key" data-key="щ">Щ</div>
+                                    <div class="key" data-key="з">З</div>
+                                    <div class="key" data-key="х">Х</div>
+                                </div>
+                                <div class="keyboard-row">
+                                    <div class="key" data-key="ф">Ф</div>
+                                    <div class="key" data-key="ы">Ы</div>
+                                    <div class="key" data-key="в">В</div>
+                                    <div class="key" data-key="а">А</div>
+                                    <div class="key" data-key="п">П</div>
+                                    <div class="key" data-key="р">Р</div>
+                                    <div class="key" data-key="о">О</div>
+                                    <div class="key" data-key="л">Л</div>
+                                    <div class="key" data-key="д">Д</div>
+                                    <div class="key" data-key="ж">Ж</div>
+                                    <div class="key" data-key="э">Э</div>
+                                </div>
+                                <div class="keyboard-row">
+                                    <div class="key" data-key="я">Я</div>
+                                    <div class="key" data-key="ч">Ч</div>
+                                    <div class="key" data-key="с">С</div>
+                                    <div class="key" data-key="м">М</div>
+                                    <div class="key" data-key="и">И</div>
+                                    <div class="key" data-key="т">Т</div>
+                                    <div class="key" data-key="ь">Ь</div>
+                                    <div class="key" data-key="б">Б</div>
+                                    <div class="key" data-key="ю">Ю</div>
+                                    <div class="key wide" data-key="delete">⌫</div>
+                                </div>
+                                <div class="keyboard-row">
+                                    <div class="key" data-key="о'">О'</div>
+                                    <div class="key" data-key="ғ">Ғ</div>
+                                    <div class="key" data-key="ҳ">Ҳ</div>
+                                    <div class="key" data-key="қ">Қ</div>
+                                    <div class="key" data-key="ў">Ў</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer" id="game-status">
+                        <p>Urinishlar soni: <span id="attempts">0</span></p>
+                    </div>
+                </div>
+                
+                <!-- Natijalar modali -->
+                <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header" id="result-header">
+                                <h5 class="modal-title" id="resultModalLabel">O'yin natijasi</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" id="result-body">
+                                <!-- Bu yerda JavaScript orqali natija ko'rsatiladi -->
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Yopish</button>
+                                <a href="{% url 'crossword_list' %}">Krossvordlar ro'yxati</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+{% if not no_games %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // O'yin ma'lumotlari
+        const gameData = {
+            id: {{ game.id }},
+            question: "{{ game.question|escapejs }}",
+            answer: "{{ game.answer|upper|escapejs }}",
+            hint: "{{ game.hint|escapejs }}"
+        };
+        
+        // O'zgaruvchilar
+        let currentAttempt = 0;
+        let maxAttempts = 5;
+        let currentInput = [];
+        let gameState = 'playing'; // 'playing', 'won', 'lost'
+        
+        // DOM elementlari
+        const wordContainer = document.getElementById('word-container');
+        const inputContainer = document.getElementById('input-container');
+        const checkButton = document.getElementById('check-button');
+        const clearButton = document.getElementById('clear-button');
+        const hintButton = document.getElementById('hint-button');
+        const attemptsDisplay = document.getElementById('attempts');
+        const keys = document.querySelectorAll('.key');
+        const resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
+        
+        // O'yin elementlarini yaratish
+        function initializeGame() {
+            // So'z uzunligiga qarab input maydonlarini yaratish
+            for (let i = 0; i < gameData.answer.length; i++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'letter-input';
+                input.maxLength = 1;
+                input.dataset.index = i;
+                input.addEventListener('input', handleInput);
+                input.addEventListener('keydown', handleKeyDown);
+                inputContainer.appendChild(input);
+                
+                currentInput.push('');
+            }
+            
+            // Klaviatura tugmalarini sozlash
+            keys.forEach(key => {
+                key.addEventListener('click', () => {
+                    const keyValue = key.dataset.key;
+                    if (keyValue === 'delete') {
+                        const inputs = document.querySelectorAll('.letter-input');
+                        const focusedInput = document.activeElement;
+                        
+                        if (focusedInput && focusedInput.classList.contains('letter-input')) {
+                            const index = parseInt(focusedInput.dataset.index);
+                            focusedInput.value = '';
+                            currentInput[index] = '';
+                            
+                            // Oldingi inputga o'tish
+                            if (index > 0) {
+                                inputs[index - 1].focus();
+                            }
+                        }
+                    } else {
+                        const focusedInput = document.activeElement;
+                        
+                        if (focusedInput && focusedInput.classList.contains('letter-input')) {
+                            const index = parseInt(focusedInput.dataset.index);
+                            focusedInput.value = keyValue.toUpperCase();
+                            currentInput[index] = keyValue.toUpperCase();
+                            
+                            // Keyingi inputga o'tish
+                            if (index < gameData.answer.length - 1) {
+                                const inputs = document.querySelectorAll('.letter-input');
+                                inputs[index + 1].focus();
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // Tugmachalar
+            checkButton.addEventListener('click', checkAnswer);
+            clearButton.addEventListener('click', clearInput);
+            hintButton.addEventListener('click', showHint);
+            
+            // Urinishlar sonini ko'rsatish
+            updateAttempts();
+            
+            // Birinchi input maydonga fokus
+            const inputs = document.querySelectorAll('.letter-input');
+            if (inputs.length > 0) {
+                inputs[0].focus();
+            }
+        }
+        
+        // Input maydonlar bilan ishlash
+        function handleInput(e) {
+            const index = parseInt(e.target.dataset.index);
+            const value = e.target.value.toUpperCase();
+            
+            currentInput[index] = value;
+            
+            // Avtomatik ravishda keyingi maydoniga o'tish
+            if (value !== '' && index < gameData.answer.length - 1) {
+                const inputs = document.querySelectorAll('.letter-input');
+                inputs[index + 1].focus();
+            }
+        }
+        
+        function handleKeyDown(e) {
+            const index = parseInt(e.target.dataset.index);
+            const inputs = document.querySelectorAll('.letter-input');
+            
+            // Backspace bosilganda
+            if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+                inputs[index - 1].focus();
+            }
+            
+            // Enter bosilganda tekshirish
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        }
+        
+        // Javobni tekshirish
+        function checkAnswer() {
+            // Barcha maydonlar to'ldirilganini tekshirish
+            if (currentInput.some(letter => letter === '')) {
+                alert('Iltimos, barcha harflarni kiriting!');
+                return;
+            }
+            
+            const userAnswer = currentInput.join('');
+            
+            // Javobni tekshirish
+            if (userAnswer === gameData.answer) {
+                gameState = 'won';
+                showResult(true);
+            } else {
+                currentAttempt++;
+                updateAttempts();
+                
+                if (currentAttempt >= maxAttempts) {
+                    gameState = 'lost';
+                    showResult(false);
+                } else {
+                    // Harflarni baholash
+                    evaluateGuess(userAnswer);
+                    
+                    // Inputni tozalash
+                    clearInput();
+                }
+            }
+        }
+        
+        // Harflarni to'g'ri/noto'g'ri ekanligini tekshirish
+        function evaluateGuess(userAnswer) {
+            // Oldingi urinishni ko'rsatish
+            const attemptDiv = document.createElement('div');
+            attemptDiv.className = 'mb-3';
+            
+            for (let i = 0; i < gameData.answer.length; i++) {
+                const letterDiv = document.createElement('div');
+                letterDiv.className = 'word-letter';
+                letterDiv.textContent = userAnswer[i];
+                
+                if (userAnswer[i] === gameData.answer[i]) {
+                    letterDiv.classList.add('correct');
+                    
+                    // Klaviaturada ham belgilash
+                    markKey(userAnswer[i], 'correct');
+                } else if (gameData.answer.includes(userAnswer[i])) {
+                    letterDiv.classList.add('wrong-position');
+                    
+                    // Klaviaturada ham belgilash
+                    markKey(userAnswer[i], 'wrong-position');
+                } else {
+                    letterDiv.classList.add('wrong');
+                    
+                    // Klaviaturada ham belgilash
+                    markKey(userAnswer[i], 'wrong');
+                }
+                
+                attemptDiv.appendChild(letterDiv);
+            }
+            
+            wordContainer.appendChild(attemptDiv);
+        }
+        
+        // Klaviatura tugmalarini belgilash
+        function markKey(letter, status) {
+            const key = document.querySelector(`.key[data-key="${letter.toLowerCase()}"]`);
+            if (key) {
+                // Oldingi statusi muhimroq bo'lsa, o'zgartirmaslik
+                if (key.classList.contains('correct')) {
+                    return;
+                }
+                
+                if (status === 'correct' || 
+                   (status === 'wrong-position' && !key.classList.contains('wrong-position'))) {
+                    key.classList.remove('wrong', 'wrong-position');
+                    key.classList.add(status);
+                } else if (!key.classList.contains('wrong-position')) {
+                    key.classList.add(status);
+                }
+            }
+        }
+        
+        // Inputni tozalash
+        function clearInput() {
+            const inputs = document.querySelectorAll('.letter-input');
+            
+            inputs.forEach((input, index) => {
+                input.value = '';
+                currentInput[index] = '';
+            });
+            
+            // Birinchi maydoniga fokus
+            if (inputs.length > 0) {
+                inputs[0].focus();
+            }
+        }
+        
+        // Yordam ko'rsatish
+        function showHint() {
+            // Ayrim harflarni ko'rsatish
+            if (gameData.hint) {
+                alert(`Yordam: ${gameData.hint}`);
+            } else {
+                // Tasodifiy harflarni ko'rsatish
+                const inputs = document.querySelectorAll('.letter-input');
+                const hintIndex = Math.floor(Math.random() * gameData.answer.length);
+                
+                inputs[hintIndex].value = gameData.answer[hintIndex];
+                currentInput[hintIndex] = gameData.answer[hintIndex];
+                
+                // Klaviaturada ham belgilash
+                markKey(gameData.answer[hintIndex], 'correct');
+            }
+        }
+        
+        // Urinishlar sonini yangilash
+        function updateAttempts() {
+            attemptsDisplay.textContent = `${currentAttempt}/${maxAttempts}`;
+        }
+        
+        // Natijalarni ko'rsatish
+        function showResult(isWin) {
+            const resultHeader = document.getElementById('result-header');
+            const resultBody = document.getElementById('result-body');
+            
+            if (isWin) {
+                resultHeader.className = 'modal-header bg-success text-white';
+                resultHeader.innerHTML = '<h5 class="modal-title">Tabriklaymiz!</h5>';
+                resultBody.innerHTML = `
+                    <div class="text-center">
+                        <h4 class="mb-3">Siz to'g'ri topdingiz!</h4>
+                        <p>So'z: <strong>${gameData.answer}</strong></p>
+                        <p>Urinishlar soni: ${currentAttempt + 1}</p>
+                        <div class="alert alert-success">
+                            Bu so'z bu: ${gameData.answer} - ${gameData.question}
+                        </div>
+                    </div>
+                `;
+            } else {
+                resultHeader.className = 'modal-header bg-danger text-white';
+                resultHeader.innerHTML = '<h5 class="modal-title">Afsus!</h5>';
+                resultBody.innerHTML = `
+                    <div class="text-center">
+                        <h4 class="mb-3">Urinishlar soni tugadi</h4>
+                        <p>To'g'ri javob: <strong>${gameData.answer}</strong></p>
+                        <div class="alert alert-info">
+                            Bu so'z bu: ${gameData.answer} - ${gameData.question}
+                        </div>
+                        <p>Qayta urinib ko'ring!</p>
+                    </div>
+                `;
+            }
+            
+            resultModal.show();
+            
+            // O'yin tugashi
+            disableGame();
+        }
+
+        // So'zni ko'rsatish
+function displayWord() {
+    wordDisplay.innerHTML = '';
+    
+    // Har bir harf uchun katak yaratish
+    const answerLength = gameData.answer.length; // Javob uzunligi
+    
+    for (let i = 0; i < answerLength; i++) {
+        const letterBox = document.createElement('div');
+        letterBox.className = 'letter-box';
+        letterBox.dataset.index = i;
+        
+        if (selectedLetters[i]) {
+            letterBox.textContent = selectedLetters[i];
+            letterBox.classList.add('filled');
+        }
+        
+        wordDisplay.appendChild(letterBox);
+        currentWord[i] = selectedLetters[i] || '';
+    }
+}
+        
+        // O'yinni o'chirib qo'yish
+        function disableGame() {
+            const inputs = document.querySelectorAll('.letter-input');
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
+            
+            checkButton.disabled = true;
+            clearButton.disabled = true;
+            hintButton.disabled = true;
+        }
+        
+        // O'yinni boshlash
+        initializeGame();
+    });
+</script>
+{% endif %}
+{% endblock %}
+{% endblock %}

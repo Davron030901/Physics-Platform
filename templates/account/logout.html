@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Chiqish" %}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-sm my-5">
+        <div class="card-header bg-danger text-white">
+          <h3 class="card-title mb-0">{% trans "Tizimdan chiqish" %}</h3>
+        </div>
+        <div class="card-body">
+          <p>{% trans 'Haqiqatan ham tizimdan chiqmoqchimisiz?' %}</p>
+
+          <form method="post" action="{% url 'account_logout' %}">
+            {% csrf_token %}
+            {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+            {% endif %}
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="submit" class="btn btn-danger">{% trans "Ha, chiqish" %}</button>
+              <a href="{% url 'index' %}" class="btn btn-secondary">{% trans "Yo'q, ortga qaytish" %}</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

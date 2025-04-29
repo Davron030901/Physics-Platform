@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  {% if action == 'create' %}Simulyatsion o'yin qo'shish{% else %}Simulyatsion o'yinni tahrirlash{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>
+                {% if action == 'create' %}
+                    <i class="fas fa-plus-circle me-2"></i>Yangi simulyatsion o'yin qo'shish
+                {% else %}
+                    <i class="fas fa-edit me-2"></i>Simulyatsion o'yinni tahrirlash
+                {% endif %}
+            </h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'game_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Orqaga
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">O'yin sarlavhasi</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="text-danger">{{ form.title.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">O'yin tavsifi</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.iframe_url.id_for_label }}" class="form-label">
+                                <i class="fas fa-link me-1"></i> Simulyatsiya URL manzili
+                            </label>
+                            {{ form.iframe_url }}
+                            {% if form.iframe_url.errors %}
+                                <div class="text-danger">{{ form.iframe_url.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">PhET yoki boshqa simulyatsiya saytlaridan iframe URL manzilini kiriting</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.thumbnail.id_for_label }}" class="form-label">
+                                <i class="fas fa-image me-1"></i> O'yin tasviri
+                            </label>
+                            {{ form.thumbnail }}
+                            {% if form.thumbnail.errors %}
+                                <div class="text-danger">{{ form.thumbnail.errors }}</div>
+                            {% endif %}
+                            {% if game and game.thumbnail %}
+                                <p class="mt-2"><small>Joriy tasvir: <a href="{{ game.thumbnail.url }}">{{ game.thumbnail.name }}</a></small></p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            {{ form.is_active }}
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Faol (saytda ko'rsatiladi)</label>
+                            {% if form.is_active.errors %}
+                                <div class="text-danger">{{ form.is_active.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary">
+                                {% if action == 'create' %}
+                                    <i class="fas fa-save me-1"></i> O'yinni saqlash
+                                {% else %}
+                                    <i class="fas fa-save me-1"></i> O'zgarishlarni saqlash
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle me-2"></i> Qo'llanma</h5>
+                </div>
+                <div class="card-body">
+                    <h6>PhET simulyatsiyalarini qo'shish:</h6>
+                    <ol>
+                        <li>PhET saytiga tashrif buyuring: <a href="https://phet.colorado.edu/" target="_blank">https://phet.colorado.edu/</a></li>
+                        <li>"Simulyatsiyalar" bo'limiga kiring va kerakli simulyatsiyani tanlang</li>
+                        <li>"Simulyatsiyani boshlash" tugmasini bosing</li>
+                        <li>Simulyatsiya havolasini nusxalang (URL ni olish uchun simulyatsiya ochilgandan keyin brauzerdagi manzilni nusxalang)</li>
+                        <li>Nusxalangan URL ni "Simulyatsiya URL manzili" maydoniga joylashtiring</li>
+                    </ol>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-lightbulb me-2"></i> <strong>Maslahat:</strong> O'yin ko'rinishini yaxshilash uchun skrinshot olib, "O'yin tasviri" sifatida yuklang.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Mashhur simulyatsiyalar</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <a href="https://phet.colorado.edu/sims/html/energy-skate-park/latest/energy-skate-park_all.html" target="_blank">Energy Skate Park</a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="https://phet.colorado.edu/sims/html/forces-and-motion-basics/latest/forces-and-motion-basics_all.html" target="_blank">Forces and Motion</a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="https://phet.colorado.edu/sims/html/wave-on-a-string/latest/wave-on-a-string_all.html" target="_blank">Wave on a String</a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="https://phet.colorado.edu/sims/html/masses-and-springs/latest/masses-and-springs_all.html" target="_blank">Masses and Springs</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

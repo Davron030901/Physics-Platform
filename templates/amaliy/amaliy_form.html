@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  {% if action == 'create' %}Amaliy mashg'ulot yaratish{% else %}Amaliy mashg'ulotni tahrirlash{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>
+                {% if action == 'create' %}
+                    <i class="fas fa-plus-circle me-2"></i>Yangi amaliy mashg'ulot yaratish
+                {% else %}
+                    <i class="fas fa-edit me-2"></i>Amaliy mashg'ulotni tahrirlash
+                {% endif %}
+            </h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'amaliy_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Orqaga
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">Mashg'ulot sarlavhasi</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="text-danger">{{ form.title.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Mashg'ulot tavsifi</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.problem_text.id_for_label }}" class="form-label">Masala matni</label>
+                            {{ form.problem_text }}
+                            {% if form.problem_text.errors %}
+                                <div class="text-danger">{{ form.problem_text.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.image.id_for_label }}" class="form-label">Masala tasviri (ixtiyoriy)</label>
+                            {{ form.image }}
+                            {% if form.image.errors %}
+                                <div class="text-danger">{{ form.image.errors }}</div>
+                            {% endif %}
+                            {% if task and task.image %}
+                                <p class="mt-2"><small>Joriy tasvir: <a href="{{ task.image.url }}">{{ task.image.name }}</a></small></p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.solution.id_for_label }}" class="form-label">Yechim (ixtiyoriy)</label>
+                            {{ form.solution }}
+                            {% if form.solution.errors %}
+                                <div class="text-danger">{{ form.solution.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">Masala yechimini kiritish ixtiyoriy. Uni keyinroq ham qo'shishingiz mumkin.</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-success">
+                                {% if action == 'create' %}
+                                    <i class="fas fa-save me-1"></i> Mashg'ulotni saqlash
+                                {% else %}
+                                    <i class="fas fa-save me-1"></i> O'zgarishlarni saqlash
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle me-2"></i> Qo'llanma</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Amaliy mashg'ulot yaratish tartibi:</h6>
+                    <ol>
+                        <li>Sarlavha va mashg'ulot tavsifini kiriting</li>
+                        <li>Masala matnini aniq yozing</li>
+                        <li>Kerak bo'lsa, masala uchun tasvir yuklang (formulalar, grafiklar)</li>
+                        <li>Mashg'ulot uchun yechimni qo'shishingiz mumkin</li>
+                    </ol>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-lightbulb me-2"></i> <strong>Maslahat:</strong> Masala matnida matematik formulalarni belgilash uchun LaTeX ko'rinishidan foydalanishingiz mumkin.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

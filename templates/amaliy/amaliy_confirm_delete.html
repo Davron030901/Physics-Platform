@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Amaliy mashg'ulotni o'chirish{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm my-5">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="card-title mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Amaliy mashg'ulotni o'chirish</h3>
+                </div>
+                <div class="card-body">
+                    <p class="lead text-center">Haqiqatan ham "{{ task.title }}" nomli amaliy mashg'ulotni o'chirmoqchimisiz?</p>
+                    <p class="text-center text-muted">Bu amal qaytarib bo'lmaydi.</p>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-1"></i> Ha, o'chirish
+                            </button>
+                            <a href="{% url 'amaliy_detail' task.id %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i> Yo'q, bekor qilish
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

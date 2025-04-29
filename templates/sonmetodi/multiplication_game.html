@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ko'paytirish o'yini{% endblock %}
+
+{% block extra_css %}
+<style>
+    .game-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    
+    .problem {
+        font-size: 48px;
+        font-weight: bold;
+        text-align: center;
+        margin: 30px 0;
+        color: #0d6efd;
+    }
+    
+    .options-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .option-btn {
+        padding: 15px;
+        font-size: 20px;
+        border: 2px solid #dee2e6;
+        border-radius: 10px;
+        background-color: #fff;
+        transition: all 0.3s;
+    }
+    
+    .option-btn:hover {
+        background-color: #e9ecef;
+        transform: translateY(-3px);
+    }
+    
+    .option-btn.correct {
+        background-color: #d4edda;
+        border-color: #198754;
+        color: #198754;
+    }
+    
+    .option-btn.incorrect {
+        background-color: #f8d7da;
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+    
+    .info-container {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+    
+    .info-box {
+        text-align: center;
+        padding: 10px;
+        background-color: #e9ecef;
+        border-radius: 5px;
+        width: 48%;
+    }
+    
+    .info-value {
+        font-size: 24px;
+        font-weight: bold;
+    }
+    
+    .result-container {
+        display: none;
+        text-align: center;
+        padding: 20px;
+        margin-top: 20px;
+        border-radius: 10px;
+    }
+    
+    .result-container.good {
+        background-color: #d4edda;
+        border: 2px solid #198754;
+    }
+    
+    .result-container.average {
+        background-color: #fff3cd;
+        border: 2px solid #ffc107;
+    }
+    
+    .result-container.poor {
+        background-color: #f8d7da;
+        border: 2px solid #dc3545;
+    }
+    
+    .result-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .result-stats {
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+    
+    .result-message {
+        font-style: italic;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h2>Ko'paytirish o'yini</h2>
+            <p class="lead">Tez va to'g'ri ko'paytirishni o'rganing!</p>
+        </div>
+    </div>
+    
+    <div class="game-container" id="game-container">
+        <div class="info-container">
+            <div class="info-box">
+                <div>Ball</div>
+                <div class="info-value" id="score">0</div>
+            </div>
+            <div class="info-box">
+                <div>Vaqt</div>
+                <div class="info-value" id="timer">30</div>
+            </div>
+        </div>
+        
+        <div class="problem" id="problem">6 × 8 = ?</div>
+        
+        <div class="options-container" id="options-container">
+            <!-- JavaScript orqali to'ldiriladi -->
+        </div>
+        
+        <div class="text-center">
+            <button class="btn btn-danger" id="reset-btn">
+                <i class="fas fa-redo me-1"></i> Qayta boshlash
+            </button>
+        </div>
+    </div>
+    
+    <div class="result-container" id="result-container">
+        <div class="result-title" id="result-title">O'yin yakunlandi!</div>
+        <div class="result-stats" id="result-stats">
+            To'g'ri javoblar: <span id="correct-answers">0</span> / <span id="total-questions">0</span>
+        </div>
+        <div class="result-stats">
+            Ball: <span id="final-score">0</span>
+        </div>
+        <div class="result-message" id="result-message"></div>
+        <button class="btn btn-primary" id="play-again-btn">
+            <i class="fas fa-play me-1"></i> Yana o'ynash
+        </button>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // O'zgaruvchilar
+        let score = 0;
+        let timeLeft = 30;
+        let timer;
+        let correctAnswer;
+        let totalQuestions = 0;
+        let correctAnswers = 0;
+        
+        // DOM elementlari
+        const scoreElement = document.getElementById('score');
+        const timerElement = document.getElementById('timer');
+        const problemElement = document.getElementById('problem');
+        const optionsContainer = document.getElementById('options-container');
+        const resetButton = document.getElementById('reset-btn');
+        const gameContainer = document.getElementById('game-container');
+        const resultContainer = document.getElementById('result-container');
+        const resultTitle = document.getElementById('result-title');
+        const resultStats = document.getElementById('result-stats');
+        const correctAnswersElement = document.getElementById('correct-answers');
+        const totalQuestionsElement = document.getElementById('total-questions');
+        const finalScoreElement = document.getElementById('final-score');
+        const resultMessageElement = document.getElementById('result-message');
+        const playAgainButton = document.getElementById('play-again-btn');
+        
+        // Tasodifiy masala yaratish
+        function generateProblem() {
+            // 1 dan 10 gacha sonlar
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+            
+            correctAnswer = num1 * num2;
+            problemElement.textContent = `${num1} × ${num2} = ?`;
+            
+            // Javob variantlari
+            const options = [correctAnswer];
+            
+            // 3 ta noto'g'ri javob qo'shish
+            while (options.length < 4) {
+                // Taxminiy javob (to'g'ri javobdan ±5 oraliqda)
+                let wrongAnswer;
+                do {
+                    // Taxminiy xato javoblar
+                    const deviation = Math.floor(Math.random() * 10) - 5;
+                    wrongAnswer = correctAnswer + deviation;
+                    
+                    // Agar javob manfiy yoki ortiq darajada katta bo'lsa
+                    if (wrongAnswer <= 0 || wrongAnswer > 100) {
+                        continue;
+                    }
+                    
+                } while (options.includes(wrongAnswer));
+                
+                options.push(wrongAnswer);
+            }
+            
+            // Variantlarni aralashtirish
+            options.sort(() => Math.random() - 0.5);
+            
+            // Variantlarni ko'rsatish
+            optionsContainer.innerHTML = '';
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = option;
+                button.addEventListener('click', () => checkAnswer(option));
+                optionsContainer.appendChild(button);
+            });
+            
+            totalQuestions++;
+        }
+        
+        // Javobni tekshirish
+        function checkAnswer(selectedValue) {
+            // O'yinda faqat faol bo'lgan tugmachalar
+            if (timeLeft <= 0) return;
+            
+            const buttons = optionsContainer.querySelectorAll('.option-btn');
+            
+            buttons.forEach(button => {
+                const value = parseInt(button.textContent);
+                
+                if (value === correctAnswer) {
+                    button.classList.add('correct');
+                } else if (value === selectedValue) {
+                    button.classList.add('incorrect');
+                }
+                
+                // Boshqa tugmachalarni o'chirib qo'yish
+                button.disabled = true;
+            });
+            
+            // To'g'ri javob tekshirish
+            if (selectedValue === correctAnswer) {
+                score += 10;
+                correctAnswers++;
+                scoreElement.textContent = score;
+                
+                // Qisqa pauza
+                setTimeout(() => {
+                    // Yangi masala
+                    generateProblem();
+                }, 1000);
+            } else {
+                // Qisqa pauza
+                setTimeout(() => {
+                    // Yangi masala
+                    generateProblem();
+                }, 1000);
+            }
+        }
+        
+        // Vaqt hisoblagich
+        function startTimer() {
+            timeLeft = 30;
+            timerElement.textContent = timeLeft;
+            clearInterval(timer);
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+                
+                if (timeLeft <= 5) {
+                    timerElement.style.color = 'red';
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    endGame();
+                }
+            }, 1000);
+        }
+        
+        // O'yinni tugatish
+        function endGame() {
+            // O'yin konteynerini yashirish
+            gameContainer.style.display = 'none';
+            
+            // Natijalarni ko'rsatish
+            totalQuestionsElement.textContent = totalQuestions;
+            correctAnswersElement.textContent = correctAnswers;
+            finalScoreElement.textContent = score;
+            
+            // Natija xabari
+            let percentage = Math.round((correctAnswers / totalQuestions) * 100);
+            
+            if (percentage >= 80) {
+                resultContainer.className = 'result-container good';
+                resultTitle.textContent = 'Ajoyib natija!';
+                resultMessageElement.textContent = 'Siz ko\'paytirishni juda yaxshi bilasiz!';
+            } else if (percentage >= 60) {
+                resultContainer.className = 'result-container average';
+                resultTitle.textContent = 'Yaxshi natija!';
+                resultMessageElement.textContent = 'Siz ko\'paytirishni yaxshi bilasiz, lekin yanada takomillashtirish mumkin.';
+            } else {
+                resultContainer.className = 'result-container poor';
+                resultTitle.textContent = 'Yaxshiroq bo\'lishi mumkin!';
+                resultMessageElement.textContent = 'Ko\'paytirish jadvalini ko\'proq mashq qilish kerak.';
+            }
+            
+            resultContainer.style.display = 'block';
+        }
+        
+        // Qayta boshlash
+        function resetGame() {
+            score = 0;
+            totalQuestions = 0;
+            correctAnswers = 0;
+            scoreElement.textContent = score;
+            timerElement.style.color = '';
+            
+            startTimer();
+            generateProblem();
+            
+            // O'yin konteynerini ko'rsatish
+            gameContainer.style.display = 'block';
+            
+            // Natijalarni yashirish
+            resultContainer.style.display = 'none';
+        }
+        
+        // "Yana o'ynash" tugmasi
+        playAgainButton.addEventListener('click', resetGame);
+        
+        // "Qayta boshlash" tugmasi
+        resetButton.addEventListener('click', resetGame);
+        
+        // O'yinni boshlash
+        resetGame();
+    });
+</script>
+{% endblock %}
+{% endblock %}

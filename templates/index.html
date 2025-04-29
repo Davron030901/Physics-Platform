@@ -1,0 +1,197 @@
+<!-- templates/index.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Fizikaning Mexanika Bo'limi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 text-center mb-4">
+        <h1 class="display-4">Fizikaning Mexanika Bo'limi</h1>
+        <p class="lead">O'qituvchi va o'quvchilar uchun zamonaviy ta'lim platformasi</p>
+    </div>
+</div>
+<div class="container">
+    <!-- Faqat profil qismini qo'shamiz -->
+    {% if user.is_authenticated and user_profile %}
+    <div class="row mb-4">
+        <div class="col-md-10 offset-md-1">
+            <div class="card border-primary shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Mening profilim</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            {% if user_profile.image %}
+                                <img src="{{ user_profile.image.url }}" alt="{{ user_profile.full_name }}" class="img-fluid rounded-circle" style="max-width: 150px; max-height: 150px;">
+                            {% else %}
+                                <img src="{% static 'images/default_user.png' %}" alt="Default user" class="img-fluid rounded-circle" style="max-width: 150px; max-height: 150px;">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h4>{{ user_profile.full_name }}</h4>
+                            <p class="text-muted">
+                                <i class="fas fa-user me-1"></i> {{ user_profile.get_role_display }}
+                                {% if user.email %}
+                                <span class="mx-2">|</span>
+                                <i class="fas fa-envelope me-1"></i> {{ user.email }}
+                                {% endif %}
+                            </p>
+                            <p>{{ user_profile.bio|truncatewords:30 }}</p>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <a href="{% url 'profile_view' %}" class="btn btn-primary">
+                                <i class="fas fa-user me-1"></i> To'liq profil
+                            </a>
+                            <a href="{% url 'profile_edit' %}" class="btn btn-outline-primary mt-2">
+                                <i class="fas fa-edit me-1"></i> Tahrirlash
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+<div class="row mt-4">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-book fa-2x my-3"></i>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Ma'ruza mashg'ulotlari</h5>
+                <p class="card-text">Fizika fanining mexanika bo'limi bo'yicha ma'ruza materiallari</p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'maruza_list' %}" class="btn btn-primary">Ko'rish</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-header bg-success text-white">
+                <i class="fas fa-tasks fa-2x my-3"></i>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Amaliy mashg'ulotlar</h5>
+                <p class="card-text">Mexanika bo'yicha masalalar va amaliy mashg'ulotlar</p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'amaliy_list' %}" class="btn btn-success">Ko'rish</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-header bg-info text-white">
+                <i class="fas fa-flask fa-2x my-3"></i>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Laboratoriya mashg'ulotlari</h5>
+                <p class="card-text">Fizika bo'yicha laboratoriya ishlari va simulyatsiyalar</p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'labaratoriya_list' %}" class="btn btn-info">Ko'rish</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-header bg-warning text-dark">
+                <i class="fas fa-question-circle fa-2x my-3"></i>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Fizika fanidan testlar</h5>
+                <p class="card-text">O'z bilimingizni sinash uchun interaktiv testlar</p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'test_list' %}" class="btn btn-warning">
+                    <i class="fas fa-question-circle me-1"></i> Fizika fanidan testlar
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- templates/index.html (krossvord kartochkasi) -->
+<div class="col-md-4 mb-4">
+    <div class="card h-100 text-center">
+        <div class="card-header bg-danger text-white">
+            <i class="fas fa-puzzle-piece fa-2x my-3"></i>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Krossvord o'yinlari</h5>
+            <p class="card-text">Fizika terminlari va tushunchalarini krossvordlar orqali o'rganing</p>
+        </div>
+        <div class="card-footer">
+            <!-- Muhim: Bu link krossvord ro'yxatiga yo'naltirishi kerak -->
+            <a href="{% url 'crossword_list' %}" class="btn btn-danger">Ko'rish</a>
+        </div>
+    </div>
+</div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-header bg-secondary text-white">
+                <i class="fas fa-calculator fa-2x my-3"></i>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Son o'yin metodlari</h5>
+                <p class="card-text">Matematik va fizik tushunchalarni o'rganish uchun o'yinlar</p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'multiplication_game' %}" class="btn btn-secondary">Ko'rish</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-header bg-dark text-white">
+                <i class="fas fa-project-diagram fa-2x my-3"></i>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Loyihalar</h5>
+                <p class="card-text">Fizika bo'yicha loyihalar va tadqiqot ishlari</p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'loyiha_list' %}" class="btn btn-dark">Ko'rish</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-header text-white" style="background-color: #563d7c;">
+                <i class="fas fa-gamepad fa-2x my-3"></i>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Qiziqarli fizik o'yin simulyatsiyalar</h5>
+                <p class="card-text">Simulyatsion o'yinlar orqali fizika qonunlarini interaktiv tarzda o'rganing</p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'game_list' %}" class="btn btn-primary" style="background-color: #563d7c; border-color: #563d7c;">Ko'rish</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-header text-white" style="background-color: #20c997;">
+                <i class="fas fa-font fa-2x my-3"></i>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">So'z o'yinlari</h5>
+                <p class="card-text">Fizika terminlarini o'rganish uchun so'z o'yinlari</p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'suz_game' %}" class="btn text-white" style="background-color: #20c997; border-color: #20c997;">Ko'rish</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

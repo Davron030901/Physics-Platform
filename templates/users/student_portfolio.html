@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Talaba Portfoliosi{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="text-center">Talaba Portfoliosi</h2>
+            <p class="lead text-center">Fizika fanidan talabalar portfoliosi</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        {% if students %}
+            {% for student in students %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header text-center">
+                        {% if student.image %}
+                            <img src="{{ student.image.url }}" alt="{{ student.full_name }}" class="rounded-circle img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
+                        {% else %}
+                            <img src="{% static 'images/default_user.png' %}" alt="Default user" class="rounded-circle img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title text-center">{{ student.full_name }}</h5>
+                        <p class="card-text">{{ student.bio|truncatewords:30 }}</p>
+                    </div>
+                    <div class="card-footer text-center">
+                        <small class="text-muted">{{ student.user.date_joined|date:"d.m.Y" }} dan buyon a'zo</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <p class="lead">Hozircha talabalar ma'lumoti mavjud emas.</p>
+                {% if user.is_authenticated and user.profile.role == 'teacher' %}
+                <p>O'quvchilar ro'yxatdan o'tganidan so'ng, ularning ma'lumotlari bu yerda ko'rinadi.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

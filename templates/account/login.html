@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block title %}{% trans "Kirish" %}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-sm my-5">
+        <div class="card-header bg-primary text-white">
+          <h3 class="card-title mb-0">{% trans "Tizimga kirish" %}</h3>
+        </div>
+        <div class="card-body">
+          <form class="login" method="POST" action="{% url 'account_login' %}">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="alert alert-danger">
+              <strong>Xatolik:</strong> Foydalanuvchi nomi yoki parol noto'g'ri.
+            </div>
+            {% endif %}
+            
+            <div class="mb-3">
+              <label for="id_login" class="form-label">{% trans "Foydalanuvchi nomi" %}</label>
+              <input type="text" name="login" placeholder="Foydalanuvchi nomi" class="form-control" id="id_login" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="id_password" class="form-label">{% trans "Parol" %}</label>
+              <input type="password" name="password" placeholder="Parol" class="form-control" id="id_password" required>
+            </div>
+            
+            <div class="mb-3 form-check">
+              <input type="checkbox" name="remember" class="form-check-input" id="id_remember">
+              <label class="form-check-label" for="id_remember">{% trans "Eslab qolish" %}</label>
+            </div>
+            
+            {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+            {% endif %}
+            
+            <div class="d-grid gap-2">
+              <button class="btn btn-primary" type="submit">{% trans "Kirish" %}</button>
+            </div>
+          </form>
+          
+          <div class="mt-3 text-center">
+            <p>
+              <a href="{% url 'account_reset_password' %}">{% trans "Parolni unutdingizmi?" %}</a>
+            </p>
+            <hr>
+            <p>Hisobingiz yo'qmi? <a href="{{ signup_url }}">Ro'yxatdan o'ting</a>!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

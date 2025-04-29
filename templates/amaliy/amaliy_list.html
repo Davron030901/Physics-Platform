@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Amaliy mashg'ulotlar{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>Amaliy mashg'ulotlar</h2>
+            <p class="lead">Fizika fanidan amaliy mashg'ulotlar</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_authenticated and user.profile.role == 'teacher' %}
+            <a href="{% url 'amaliy_create' %}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Yangi mashg'ulot qo'shish
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        {% if tasks %}
+            {% for task in tasks %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title">{{ task.title }}</h5>
+                    </div>
+                    {% if task.image %}
+                    <img src="{{ task.image.url }}" class="card-img-top" alt="{{ task.title }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="text-center pt-3">
+                        <i class="fas fa-tasks fa-4x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <p class="card-text">{{ task.description|truncatewords:20 }}</p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <a href="{% url 'amaliy_detail' task.id %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye"></i> Ko'rish
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Hozircha amaliy mashg'ulotlar mavjud emas.
+                </div>
+                {% if user.is_authenticated and user.profile.role == 'teacher' %}
+                <a href="{% url 'amaliy_create' %}" class="btn btn-success mt-3">
+                    <i class="fas fa-plus"></i> Birinchi mashg'ulotni qo'shing
+                </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

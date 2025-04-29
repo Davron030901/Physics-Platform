@@ -1,0 +1,282 @@
+<!-- templates/fiziktest/demo_test.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Demo Test{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h2>Demo Test</h2>
+            <p class="lead">Tizimga kirmasdan oldin namuna test</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Bu demo test. Natijalaringiz saqlanmaydi. To'liq testni ishlash uchun <a href="{% url 'account_login' %}">tizimga kiring</a>.
+            </div>
+            
+            <div id="quiz-container">
+                <!-- Bu yerda JavaScript orqali savollar ko'rsatiladi -->
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">Savol <span id="current-question">1</span>/<span id="total-questions">5</span></h3>
+                        <div>
+                            <span id="timer" class="badge bg-warning text-dark p-2 fs-5">
+                                <i class="fas fa-clock me-1"></i>
+                                <span id="timer-value">30</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="progress mb-4">
+                            <div id="progress-bar" class="progress-bar bg-success" role="progressbar" style="width: 20%" 
+                                 aria-valuenow="1" aria-valuemin="0" aria-valuemax="5">
+                                1/5
+                            </div>
+                        </div>
+                        
+                        <h5 id="question-text" class="card-title mb-4"></h5>
+                        
+                        <div id="choices-container" class="mt-4">
+                            <!-- Bu yerda JavaScript orqali javob variantlari ko'rsatiladi -->
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <button id="next-button" class="btn btn-primary btn-lg">
+                                <i class="fas fa-arrow-right me-1"></i> Keyingi savol
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="results-container" style="display: none;">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="fas fa-chart-pie me-2"></i> Demo natijalar</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded mb-3">
+                                    <h3 class="text-primary"><span id="score">0</span>/5</h3>
+                                    <p class="mb-0">To'g'ri javoblar</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded mb-3">
+                                    <h3 class="text-success"><span id="percentage">0</span>%</h3>
+                                    <p class="mb-0">O'zlashtirish</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-warning mt-4">
+                            <i class="fas fa-exclamation-triangle me-2"></i> Bu demo test natijasi. To'liq test ishlash va natijalaringizni saqlash uchun tizimga kiring.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center mb-4">
+                    <a href="{% url 'account_login' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-sign-in-alt me-1"></i> Tizimga kirish
+                    </a>
+                    <a href="{% url 'account_signup' %}" class="btn btn-success btn-lg">
+                        <i class="fas fa-user-plus me-1"></i> Ro'yxatdan o'tish
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+    .choice-btn {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+    
+    .choice-btn:hover {
+        background-color: #e9ecef;
+        border-color: #0d6efd;
+    }
+    
+    .choice-btn.selected {
+        background-color: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+    }
+    
+    .choice-btn.correct {
+        background-color: #198754;
+        color: white;
+        border-color: #198754;
+    }
+    
+    .choice-btn.incorrect {
+        background-color: #dc3545;
+        color: white;
+        border-color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Demo savollar
+        const questions = [
+            {% for question in questions %}
+            {
+                id: {{ question.id }},
+                text: "{{ question.text|escapejs }}",
+                choices: [
+                {% for choice in question.choices.all %}
+                    {
+                        id: {{ choice.id }},
+                        text: "{{ choice.text|escapejs }}",
+                        isCorrect: {% if choice.is_correct %}true{% else %}false{% endif %}
+                    },
+                    {% endfor %}
+                ]
+            },
+            {% endfor %}
+        ];
+        
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedChoiceId = null;
+        let timeLeft = 30;
+        let timer;
+        
+        // DOM elementlari
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+        const questionText = document.getElementById('question-text');
+        const choicesContainer = document.getElementById('choices-container');
+        const nextButton = document.getElementById('next-button');
+        const currentQuestionSpan = document.getElementById('current-question');
+        const totalQuestionsSpan = document.getElementById('total-questions');
+        const timerValue = document.getElementById('timer-value');
+        const progressBar = document.getElementById('progress-bar');
+        const scoreSpan = document.getElementById('score');
+        const percentageSpan = document.getElementById('percentage');
+        
+        // Savolni ko'rsatish
+        function showQuestion(questionIndex) {
+            const question = questions[questionIndex];
+            questionText.textContent = question.text;
+            
+            // Javob variantlarini ko'rsatish
+            choicesContainer.innerHTML = '';
+            question.choices.forEach(choice => {
+               const button = document.createElement('button');
+               button.textContent = choice.text;
+               button.className = 'choice-btn';
+               button.setAttribute('data-id', choice.id);
+               button.setAttribute('data-correct', choice.isCorrect);
+               
+               button.addEventListener('click', function() {
+                   // Barcha variantlardan selected klassini olib tashlash
+                   document.querySelectorAll('.choice-btn').forEach(btn => {
+                       btn.classList.remove('selected');
+                   });
+                   
+                   // Tanlangan variant uchun selected klassini qo'shish
+                   this.classList.add('selected');
+                   selectedChoiceId = choice.id;
+               });
+               
+               choicesContainer.appendChild(button);
+           });
+           
+           // Joriy savol va umumiy savollar sonini yangilash
+           currentQuestionSpan.textContent = questionIndex + 1;
+           totalQuestionsSpan.textContent = questions.length;
+           
+           // Progress polosasin yangilash
+           const progress = ((questionIndex + 1) / questions.length) * 100;
+           progressBar.style.width = progress + '%';
+           progressBar.setAttribute('aria-valuenow', questionIndex + 1);
+           progressBar.textContent = (questionIndex + 1) + '/' + questions.length;
+           
+          // Taymerni yangilash va qayta ishga tushirish
+          clearInterval(timer);
+           timeLeft = 30;
+           timerValue.textContent = timeLeft;
+           document.getElementById('timer').classList.remove('bg-danger', 'text-white');
+           document.getElementById('timer').classList.add('bg-warning', 'text-dark');
+           
+           timer = setInterval(() => {
+               timeLeft--;
+               timerValue.textContent = timeLeft;
+               
+               if (timeLeft <= 10) {
+                   document.getElementById('timer').classList.remove('bg-warning', 'text-dark');
+                   document.getElementById('timer').classList.add('bg-danger', 'text-white');
+               }
+               
+               if (timeLeft <= 0) {
+                   clearInterval(timer);
+                   nextQuestion();
+               }
+           }, 1000);
+       }
+       
+       // Keyingi savolga o'tish
+       function nextQuestion() {
+           // Tanlangan javobni tekshirish
+           if (selectedChoiceId !== null) {
+               const selectedButton = document.querySelector(`.choice-btn[data-id="${selectedChoiceId}"]`);
+               const isCorrect = selectedButton.getAttribute('data-correct') === 'true';
+               
+               if (isCorrect) {
+                   score++;
+               }
+           }
+           
+           currentQuestionIndex++;
+           selectedChoiceId = null;
+           
+           // Barcha savollar tugadimi?
+           if (currentQuestionIndex >= questions.length) {
+               showResults();
+           } else {
+               showQuestion(currentQuestionIndex);
+           }
+       }
+       
+       // Natijalarni ko'rsatish
+       function showResults() {
+           clearInterval(timer);
+           quizContainer.style.display = 'none';
+           resultsContainer.style.display = 'block';
+           
+           scoreSpan.textContent = score;
+           const percentage = Math.round((score / questions.length) * 100);
+           percentageSpan.textContent = percentage;
+       }
+       
+       // Keyingi tugmasi bosilganda
+       nextButton.addEventListener('click', function() {
+           nextQuestion();
+       });
+       
+       // Birinchi savolni ko'rsatish
+       showQuestion(currentQuestionIndex);
+   });
+</script>
+{% endblock %}
+{% endblock %}

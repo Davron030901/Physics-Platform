@@ -1,0 +1,210 @@
+<!-- templates/maruza/maruza_detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ lecture.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .document-viewer {
+        width: 100%;
+        height: 600px;
+        border: 1px solid #ccc;
+        box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    
+    .document-title {
+        background-color: #e74c3c;
+        color: white;
+        text-align: center;
+        padding: 15px;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+    
+    .document-content {
+        background-color: #f9f9f9;
+        height: 550px;
+        overflow: hidden;
+    }
+    
+    .document-content iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>{{ lecture.title }}</h2>
+            <p class="text-muted">
+                <i class="fas fa-user me-1"></i> {{ lecture.teacher.get_full_name|default:lecture.teacher.username }}
+                <span class="mx-2">|</span>
+                <i class="fas fa-calendar me-1"></i> {{ lecture.created_at|date:"d.m.Y" }}
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_authenticated and user == lecture.teacher or user.is_staff %}
+            <div class="btn-group">
+                <a href="{% url 'maruza_edit' lecture.id %}" class="btn btn-outline-primary">
+                    <i class="fas fa-edit me-1"></i> Tahrirlash
+                </a>
+                <a href="{% url 'maruza_delete' lecture.id %}" class="btn btn-outline-danger">
+                    <i class="fas fa-trash me-1"></i> O'chirish
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Ma'ruza haqida</h5>
+                    <p class="card-text">{{ lecture.description|linebreaks }}</p>
+                </div>
+            </div>
+            
+            {% if lecture.google_docs_url or lecture.file %}
+            <div class="document-viewer">
+                <h3 class="document-title">{{ lecture.title }}</h3>
+                <div class="document-content">
+                    {% if lecture.google_docs_url %}
+                        <iframe src="{{ lecture.google_docs_url }}"></iframe>
+                    {% elif lecture.file %}
+                        {% if lecture.get_file_type == 'pdf' %}
+                            <iframe src="{{ lecture.file.url }}"></iframe>
+                        {% else %}
+                            <iframe src="https://docs.google.com/viewer?url={{ request.scheme }}://{{ request.get_host }}{{ lecture.file.url }}&embedded=true"></iframe>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% if lecture.file %}
+            <div class="text-center mb-4">
+                <a href="{{ lecture.file.url }}" class="btn btn-primary" download>
+                    <i class="fas fa-download me-1"></i> Yuklab olish
+                </a>
+            </div>
+            {% endif %}
+            {% endif %}
+            
+            {% if lecture.video_url %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-video me-2"></i> Video ma'ruza</h5>
+                </div>
+                <div class="card-body">
+                    <div class="ratio ratio-16x9">
+                        <iframe src="{{ lecture.get_embedded_video_url }}" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            {% if lecture.file or lecture.google_docs_url %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-file-alt me-2"></i> Ma'ruza fayli</h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if lecture.google_docs_url %}
+                        <i class="fas fa-file-alt fa-5x text-info mb-3"></i>
+                        <p>Google Docs havolasi</p>
+                        <a href="{{ lecture.google_docs_url }}" class="btn btn-primary" target="_blank">
+                            <i class="fas fa-external-link-alt me-1"></i> Google Docs'da ochish
+                        </a>
+                    {% elif lecture.file %}
+                        {% if lecture.get_file_type == 'pdf' %}
+                            <i class="fas fa-file-pdf fa-5x text-danger mb-3"></i>
+                        {% elif lecture.get_file_type == 'word' %}
+                            <i class="fas fa-file-word fa-5x text-primary mb-3"></i>
+                        {% elif lecture.get_file_type == 'powerpoint' %}
+                            <i class="fas fa-file-powerpoint fa-5x text-warning mb-3"></i>
+                        {% elif lecture.get_file_type == 'image' %}
+                            <i class="fas fa-file-image fa-5x text-success mb-3"></i>
+                        {% else %}
+                            <i class="fas fa-file fa-5x text-secondary mb-3"></i>
+                        {% endif %}
+                        
+                        <p>{{ lecture.file.name|slice:"9:" }}</p>
+                        <a href="{{ lecture.file.url }}" class="btn btn-primary" download>
+                            <i class="fas fa-download me-1"></i> Yuklab olish
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle me-2"></i> Qo'shimcha ma'lumot</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Yuklangan sana</span>
+                            <span>{{ lecture.created_at|date:"d.m.Y" }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Oxirgi yangilanish</span>
+                            <span>{{ lecture.updated_at|date:"d.m.Y" }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>O'qituvchi</span>
+                            <span>{{ lecture.teacher.get_full_name|default:lecture.teacher.username }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pagination for multiple lectures -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="Ma'ruza sahifalari">
+                <ul class="pagination justify-content-center">
+                    {% if prev_lecture %}
+                    <li class="page-item">
+                        <a class="page-link" href="{% url 'maruza_detail' prev_lecture.id %}">
+                            <i class="fas fa-chevron-left me-1"></i> Oldingi ma'ruza
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="fas fa-chevron-left me-1"></i> Oldingi ma'ruza</span>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="page-item">
+                        <a class="page-link" href="{% url 'maruza_list' %}">
+                            <i class="fas fa-th-list me-1"></i> Barcha ma'ruzalar
+                        </a>
+                    </li>
+                    
+                    {% if next_lecture %}
+                    <li class="page-item">
+                        <a class="page-link" href="{% url 'maruza_detail' next_lecture.id %}">
+                            Keyingi ma'ruza <i class="fas fa-chevron-right ms-1"></i>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Keyingi ma'ruza <i class="fas fa-chevron-right ms-1"></i></span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Loyihalar{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>Fizika fanidan loyihalar</h2>
+            <p class="lead">Talabalar tomonidan yaratilgan loyihalar to'plami</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_authenticated and user.profile.role == 'student' %}
+            <a href="{% url 'loyiha_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Yangi loyiha qo'shish
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        {% if projects %}
+            {% for project in projects %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title">{{ project.title }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ project.description|truncatewords:20 }}</p>
+                        
+                        <div class="mb-2">
+                            <span class="badge {% if project.status == 'draft' %}bg-secondary{% elif project.status == 'submitted' %}bg-primary{% elif project.status == 'reviewed' %}bg-info{% elif project.status == 'approved' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ project.get_status_display }}
+                            </span>
+                            <small class="text-muted">{{ project.created_at|date:"d.m.Y" }}</small>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <a href="{% url 'loyiha_detail' project.id %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye me-1"></i> Ko'rish
+                        </a>
+                        {% if user == project.student and project.status == 'draft' or project.status == 'rejected' %}
+                        <a href="{% url 'loyiha_edit' project.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-edit me-1"></i> Tahrirlash
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Hozircha loyihalar mavjud emas.
+                </div>
+                {% if user.is_authenticated and user.profile.role == 'student' %}
+                <a href="{% url 'loyiha_create' %}" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus me-1"></i> Birinchi loyihani qo'shing
+                </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

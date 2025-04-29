@@ -1,0 +1,57 @@
+<!-- templates/maruza/maruza_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ma'ruzalar{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>Ma'ruzalar</h2>
+        <p class="lead">Fizika fanidan ma'ruza materiallari</p>
+    </div>
+    <div class="col-md-4 text-end">
+        {% if user.is_authenticated and user.profile.role == 'teacher' %}
+        <a href="{% url 'maruza_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Yangi ma'ruza qo'shish
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    {% if lectures %}
+        {% for lecture in lectures %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title">{{ lecture.title }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ lecture.description|truncatewords:20 }}</p>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <a href="{% url 'maruza_detail' lecture.id %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-eye"></i> Ko'rish
+                    </a>
+                    {% if lecture.file %}
+                    <a href="{{ lecture.file.url }}" class="btn btn-sm btn-success" download>
+                        <i class="fas fa-download"></i> Yuklab olish
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12 text-center py-5">
+            <p class="lead">Hozircha ma'ruzalar mavjud emas.</p>
+            {% if user.is_authenticated and user.profile.role == 'teacher' %}
+            <a href="{% url 'maruza_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Birinchi ma'ruzani qo'shing
+            </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

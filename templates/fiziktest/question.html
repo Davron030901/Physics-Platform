@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load fiziktest_extras %}
+{% block title %}Fizika Testi - Savol {{ question_index|add:1 }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Savol {{ question_index|add:1 }}/{{ total_questions }}</h3>
+                    <div>
+                        <span id="timer" class="badge bg-warning text-dark p-2 fs-5">
+                            <i class="fas fa-clock me-1"></i>
+                            <span id="timer-value">{{ question.time_limit }}</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-4">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ question_index|add:1|multiply:100|divide:total_questions }}%" 
+                             aria-valuenow="{{ question_index|add:1 }}" aria-valuemin="0" aria-valuemax="{{ total_questions }}">
+                            {{ question_index|add:1 }}/{{ total_questions }}
+                        </div>
+                    </div>
+                    
+                    <h5 class="card-title mb-4">{{ question.text }}</h5>
+                    
+                    <form method="post" id="questionForm">
+                        {% csrf_token %}
+                        <div class="mt-4">
+                            {% for choice in question.choices.all %}
+                            <div class="form-check mb-3 p-0">
+                                <input class="form-check-input d-none" type="radio" name="choice" id="choice{{ choice.id }}" value="{{ choice.id }}">
+                                <label class="form-check-label w-100 p-3 border rounded choice-label" for="choice{{ choice.id }}">
+                                    {{ choice.text }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-arrow-right me-1"></i> Keyingi savol
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-muted">
+                    <div class="d-flex justify-content-between">
+                        <small>Mavzu: {{ question.get_topic_display }}</small>
+                        <small>Ball: {{ question.points }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+    .choice-label {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .choice-label:hover {
+        background-color: #f8f9fa;
+        border-color: #0d6efd !important;
+    }
+    input[type="radio"]:checked + .choice-label {
+        background-color: #0d6efd;
+        color: white;
+        border-color: #0d6efd !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Timer
+    let timeLeft = {{ question.time_limit }};
+    const timerElement = document.getElementById('timer-value');
+    
+    const timer = setInterval(() => {
+        timeLeft--;
+        timerElement.textContent = timeLeft;
+        
+        if (timeLeft <= 10) {
+            document.getElementById('timer').classList.remove('bg-warning');
+            document.getElementById('timer').classList.add('bg-danger', 'text-white');
+        }
+        
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            document.getElementById('questionForm').submit();
+        }
+    }, 1000);
+</script>
+{% endblock %}
+{% endblock %}

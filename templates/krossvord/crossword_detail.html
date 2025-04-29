@@ -1,0 +1,720 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ crossword.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .game-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .puzzle-grid {
+        position: relative;
+        margin-bottom: 30px;
+        margin-right: 20px;
+    }
+    
+    .row {
+        display: flex;
+    }
+    
+    .cell {
+        width: 40px;
+        height: 40px;
+        border: 1px solid #000;
+        position: relative;
+        background-color: white;
+    }
+    
+    .cell.inactive {
+        background-color: #333;
+        border: 1px solid #666;
+    }
+    
+    .cell input {
+        width: 100%;
+        height: 100%;
+        border: none;
+        text-align: center;
+        font-size: 20px;
+        text-transform: uppercase;
+        font-weight: bold;
+        background: transparent;
+    }
+    
+    .cell input:focus {
+        outline: none;
+        background-color: #e3f2fd;
+    }
+    
+    .number {
+        position: absolute;
+        top: 1px;
+        left: 2px;
+        font-size: 10px;
+        color: #333;
+        font-weight: bold;
+    }
+    
+    .clues {
+        flex: 1;
+        min-width: 300px;
+    }
+    
+    .clues h2 {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #007bff;
+    }
+    
+    .clue-section {
+        margin-bottom: 30px;
+    }
+    
+    .clue-section h3 {
+        margin-bottom: 15px;
+        color: #007bff;
+        padding-left: 10px;
+        border-left: 4px solid #007bff;
+    }
+    
+    .clue-list {
+        list-style-type: none;
+        padding: 0;
+    }
+    
+    .clue-item {
+        padding: 8px 10px;
+        margin-bottom: 5px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .clue-item:hover {
+        background-color: #e9ecef;
+    }
+    
+    .clue-item.active {
+        background-color: #e3f2fd;
+        border-left: 4px solid #007bff;
+    }
+    
+    .clue-item.completed {
+        text-decoration: line-through;
+        color: #28a745;
+        background-color: #d4edda;
+    }
+    
+    .clue-num {
+        font-weight: bold;
+        margin-right: 8px;
+        display: inline-block;
+        width: 20px;
+        text-align: right;
+    }
+    
+    .control-panel {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        gap: 10px;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+    
+    .btn-check {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .btn-check:hover {
+        background-color: #218838;
+    }
+    
+    .btn-hint {
+        background-color: #17a2b8;
+        color: white;
+    }
+    
+    .btn-hint:hover {
+        background-color: #138496;
+    }
+    
+    .btn-reset {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .btn-reset:hover {
+        background-color: #c82333;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .game-container {
+            flex-direction: column;
+        }
+        
+        .puzzle-grid {
+            margin-right: 0;
+            margin-bottom: 30px;
+            align-self: center;
+        }
+        
+        .clues {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center mb-4">{{ crossword.title }}</h1>
+    <p class="text-center lead mb-5">{{ crossword.description }}</p>
+    
+    <div class="game-container">
+        <div class="puzzle-grid" id="puzzle-grid">
+            <!-- JavaScript tomonidan to'ldiriladi -->
+        </div>
+        
+        <div class="clues">
+            <div class="clue-section">
+                <h3>Gorizontal chizig` bo`ylab</h3>
+                <ul class="clue-list" id="across-clues">
+                    {% for clue in across_clues %}
+                    <li class="clue-item" data-id="{{ clue.id }}" data-direction="across" data-row="{{ clue.row }}" data-col="{{ clue.col }}" data-answer="{{ clue.answer }}">
+                        <span class="clue-num">{{ clue.number }}.</span> {{ clue.clue }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="clue-section">
+                <h3>Vertikal chizig` bo`ylab</h3>
+                <ul class="clue-list" id="down-clues">
+                    {% for clue in down_clues %}
+                    <li class="clue-item" data-id="{{ clue.id }}" data-direction="down" data-row="{{ clue.row }}" data-col="{{ clue.col }}" data-answer="{{ clue.answer }}">
+                        <span class="clue-num">{{ clue.number }}.</span> {{ clue.clue }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="control-panel">
+                <button class="btn btn-check" id="check-btn">
+                    <i class="fas fa-check me-1"></i> Tekshirish
+                </button>
+                <button class="btn btn-hint" id="hint-btn">
+                    <i class="fas fa-lightbulb me-1"></i> Yordam
+                </button>
+                <button class="btn btn-reset" id="reset-btn">
+                    <i class="fas fa-redo me-1"></i> Qayta boshlash
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Krossvord ma'lumotlari
+    const crosswordData = {
+        clues: [
+            {% for clue in across_clues %}
+            {
+                id: {{ clue.id }},
+                number: {{ clue.number }},
+                text: "{{ clue.clue|escapejs }}",
+                answer: "{{ clue.answer|upper|escapejs }}",
+                row: {{ clue.row }},
+                col: {{ clue.col }},
+                direction: "{{ clue.direction }}"
+            },
+            {% endfor %}
+            {% for clue in down_clues %}
+            {
+                id: {{ clue.id }},
+                number: {{ clue.number }},
+                text: "{{ clue.clue|escapejs }}",
+                answer: "{{ clue.answer|upper|escapejs }}",
+                row: {{ clue.row }},
+                col: {{ clue.col }},
+                direction: "{{ clue.direction }}"
+            },
+            {% endfor %}
+        ]
+    };
+    
+    // Krossvord o'lchamlari
+    const width = 13;
+    const height = 13;
+    
+    // Krossvord gridi
+    let grid = [];
+    
+    // DOM elementlari
+    const puzzleGrid = document.getElementById('puzzle-grid');
+    const acrossClues = document.querySelectorAll('#across-clues .clue-item');
+    const downClues = document.querySelectorAll('#down-clues .clue-item');
+    const checkButton = document.getElementById('check-btn');
+    const hintButton = document.getElementById('hint-btn');
+    const resetButton = document.getElementById('reset-btn');
+    
+    // Krossvord gridini yaratish
+    function initializeGrid() {
+        // Bo'sh grid yaratish
+        for (let i = 0; i < height; i++) {
+            grid[i] = [];
+            for (let j = 0; j < width; j++) {
+                grid[i][j] = {
+                    letter: '',
+                    isActive: false,
+                    number: null,
+                    acrossClueId: null,
+                    downClueId: null
+                };
+            }
+        }
+        
+        // Savollar asosida gridni to'ldirish
+        crosswordData.clues.forEach(clue => {
+            const { row, col, direction, answer, number } = clue;
+            
+            // Boshlang'ich katakka raqam qo'shish
+            grid[row][col].isActive = true;
+            grid[row][col].number = number;
+            
+            // So'z kataklarini belgilash
+            for (let i = 0; i < answer.length; i++) {
+                let currentRow = row;
+                let currentCol = col;
+                
+                if (direction === "across") {
+                    currentCol += i;
+                } else {
+                    currentRow += i;
+                }
+                
+                if (currentRow < height && currentCol < width) {
+                    grid[currentRow][currentCol].isActive = true;
+                    
+                    // Savol ID sini saqlash
+                    if (direction === "across") {
+                        grid[currentRow][currentCol].acrossClueId = clue.id;
+                    } else {
+                        grid[currentRow][currentCol].downClueId = clue.id;
+                    }
+                }
+            }
+        });
+        
+        // Grid HTML yaratish
+        renderGrid();
+    }
+    
+    // Grid HTML yaratish
+    function renderGrid() {
+        puzzleGrid.innerHTML = '';
+        
+        for (let i = 0; i < height; i++) {
+            const row = document.createElement('div');
+            row.className = 'row';
+            
+            for (let j = 0; j < width; j++) {
+                const cell = document.createElement('div');
+                cell.className = grid[i][j].isActive ? 'cell' : 'cell inactive';
+                
+                if (grid[i][j].isActive) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.maxLength = 1;
+                    input.dataset.row = i;
+                    input.dataset.col = j;
+                    
+                    // Input hodisalarini bog'lash
+                    input.addEventListener('focus', handleInputFocus);
+                    input.addEventListener('input', handleInputChange);
+                    input.addEventListener('keydown', handleKeyDown);
+                    
+                    cell.appendChild(input);
+                    
+                    // Raqam mavjud bo'lsa, ko'rsatish
+                    if (grid[i][j].number !== null) {
+                        const numberSpan = document.createElement('span');
+                        numberSpan.className = 'number';
+                        numberSpan.textContent = grid[i][j].number;
+                        cell.appendChild(numberSpan);
+                    }
+                }
+                
+                row.appendChild(cell);
+            }
+            
+            puzzleGrid.appendChild(row);
+        }
+    }
+    
+    // Joriy yo'nalish va savol
+    let currentDirection = 'across';
+    let currentClueId = null;
+    
+    // Input maydoniga fokus bo'lganda
+    function handleInputFocus(e) {
+        const row = parseInt(e.target.dataset.row);
+        const col = parseInt(e.target.dataset.col);
+        
+        // Savolni aniqlash
+        if (!currentClueId) {
+            if (grid[row][col].acrossClueId && currentDirection === 'across') {
+                selectClue(grid[row][col].acrossClueId, 'across');
+            } else if (grid[row][col].downClueId && currentDirection === 'down') {
+                selectClue(grid[row][col].downClueId, 'down');
+            } else if (grid[row][col].acrossClueId) {
+                selectClue(grid[row][col].acrossClueId, 'across');
+            } else if (grid[row][col].downClueId) {
+                selectClue(grid[row][col].downClueId, 'down');
+            }
+        }
+    }
+    
+    // Input maydoni o'zgarganida
+    function handleInputChange(e) {
+        const row = parseInt(e.target.dataset.row);
+        const col = parseInt(e.target.dataset.col);
+        const value = e.target.value.toUpperCase();
+        
+        // Harfni saqlash
+        grid[row][col].letter = value;
+        
+        // Agar harf kiritilgan bo'lsa, keyingi katakka o'tish
+        if (value && currentClueId) {
+            const clue = crosswordData.clues.find(c => c.id === currentClueId);
+            
+            if (clue) {
+                let nextRow = row;
+                let nextCol = col;
+                
+                if (clue.direction === 'across') {
+                    nextCol++;
+                } else {
+                    nextRow++;
+                }
+                
+                // Keyingi katak mavjud bo'lsa va faol bo'lsa, fokus qilish
+                if (nextRow < height && nextCol < width && grid[nextRow][nextCol].isActive) {
+                    const nextInput = document.querySelector(`input[data-row="${nextRow}"][data-col="${nextCol}"]`);
+                    if (nextInput) {
+                        nextInput.focus();
+                    }
+                }
+            }
+        }
+        
+        // Savollarni tugallanganini tekshirish
+        checkAllClues();
+    }
+    
+    // Klaviatura tugmachalari uchun
+    function handleKeyDown(e) {
+        const row = parseInt(e.target.dataset.row);
+        const col = parseInt(e.target.dataset.col);
+        
+        switch (e.key) {
+            case 'ArrowUp':
+                navigateToCell(row - 1, col);
+                break;
+            case 'ArrowDown':
+                navigateToCell(row + 1, col);
+                break;
+            case 'ArrowLeft':
+                navigateToCell(row, col - 1);
+                break;
+            case 'ArrowRight':
+                navigateToCell(row, col + 1);
+                break;
+            case 'Tab':
+                e.preventDefault();
+                toggleDirection();
+                break;
+            case 'Backspace':
+                if (!e.target.value) {
+                    // Agar katak bo'sh bo'lsa, oldingi katakka o'tish
+                    if (currentDirection === 'across') {
+                        navigateToCell(row, col - 1);
+                    } else {
+                        navigateToCell(row - 1, col);
+                    }
+                }
+                break;
+        }
+    }
+    
+    // Katak fokus qilish
+    function navigateToCell(row, col) {
+        if (row >= 0 && row < height && col >= 0 && col < width && grid[row][col].isActive) {
+            const input = document.querySelector(`input[data-row="${row}"][data-col="${col}"]`);
+            if (input) {
+                input.focus();
+            }
+        }
+    }
+    
+    // Yo'nalishni almashtirish
+    function toggleDirection() {
+        currentDirection = currentDirection === 'across' ? 'down' : 'across';
+        
+        const row = parseInt(document.activeElement.dataset.row);
+        const col = parseInt(document.activeElement.dataset.col);
+        
+        if (currentDirection === 'across' && grid[row][col].acrossClueId) {
+            selectClue(grid[row][col].acrossClueId, 'across');
+        } else if (currentDirection === 'down' && grid[row][col].downClueId) {
+            selectClue(grid[row][col].downClueId, 'down');
+        }
+    }
+    
+    // Savolni tanlash
+    function selectClue(clueId, direction) {
+        // Oldingi savolni bekor qilish
+        document.querySelectorAll('.clue-item.active').forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        currentClueId = clueId;
+        currentDirection = direction;
+        
+        // Savolni tanlash
+        const clueElement = document.querySelector(`.clue-item[data-id="${clueId}"]`);
+        if (clueElement) {
+            clueElement.classList.add('active');
+            clueElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+    
+    // Savollarni tugallanganini tekshirish
+    function checkAllClues() {
+        crosswordData.clues.forEach(clue => {
+            const { row, col, direction, answer } = clue;
+            let userAnswer = '';
+            
+            // Foydalanuvchi javobini olish
+            for (let i = 0; i < answer.length; i++) {
+                let currentRow = row;
+                let currentCol = col;
+                
+                if (direction === "across") {
+                    currentCol += i;
+                } else {
+                    currentRow += i;
+                }
+                
+                if (currentRow < height && currentCol < width) {
+                    userAnswer += grid[currentRow][currentCol].letter || '';
+                }
+            }
+            
+            // Javobni tekshirish
+            const clueElement = document.querySelector(`.clue-item[data-id="${clue.id}"]`);
+            
+            if (userAnswer === answer) {
+                if (clueElement) {
+                    clueElement.classList.add('completed');
+                }
+            } else {
+                if (clueElement) {
+                    clueElement.classList.remove('completed');
+                }
+            }
+        });
+    }
+    
+    // Barcha javoblarni tekshirish
+    function checkAnswers() {
+        let correct = 0;
+        let incorrect = 0;
+        
+        crosswordData.clues.forEach(clue => {
+            const { row, col, direction, answer } = clue;
+            let userAnswer = '';
+            
+            // Foydalanuvchi javobini olish
+            for (let i = 0; i < answer.length; i++) {
+                let currentRow = row;
+                let currentCol = col;
+                
+                if (direction === "across") {
+                    currentCol += i;
+                } else {
+                    currentRow += i;
+                }
+                
+                if (currentRow < height && currentCol < width) {
+                    userAnswer += grid[currentRow][currentCol].letter || '';
+                }
+            }
+            
+            // Javobni tekshirish
+            if (userAnswer === answer) {
+                correct++;
+                
+                // Savol elementini belgilash
+                const clueElement = document.querySelector(`.clue-item[data-id="${clue.id}"]`);
+                if (clueElement) {
+                    clueElement.classList.add('completed');
+                }
+            } else if (userAnswer.length > 0) {
+                incorrect++;
+            }
+        });
+        
+        // Natijalarni ko'rsatish
+        if (correct + incorrect > 0) {
+            const totalAnswered = correct + incorrect;
+            const message = `To'g'ri javoblar: ${correct}/${totalAnswered}\nBarcha savollar: ${crosswordData.clues.length}`;
+            alert(message);
+        } else {
+            alert('Hech bo\'lmaganda bitta javob kiriting.');
+        }
+    }
+    
+    // Yordam ko'rsatish
+    function showHint() {
+        // Agar joriy savol tanlangan bo'lsa
+        if (currentClueId) {
+            const clue = crosswordData.clues.find(c => c.id === currentClueId);
+            
+            if (clue) {
+                // Tasodifiy bitta harfni ko'rsatish
+                const { row, col, direction, answer } = clue;
+                const emptyIndices = [];
+                
+                for (let i = 0; i < answer.length; i++) {
+                    let currentRow = row;
+                    let currentCol = col;
+                    
+                    if (direction === "across") {
+                        currentCol += i;
+                    } else {
+                        currentRow += i;
+                    }
+                    
+                    if (currentRow < height && currentCol < width) {
+                        if (!grid[currentRow][currentCol].letter) {
+                            emptyIndices.push({ row: currentRow, col: currentCol, letter: answer[i] });
+                        }
+                    }
+                }
+                
+                if (emptyIndices.length > 0) {
+                    // Tasodifiy bo'sh katak
+                    const randomIndex = Math.floor(Math.random() * emptyIndices.length);
+                    const { row, col, letter } = emptyIndices[randomIndex];
+                    
+                    // Harfni ko'rsatish
+                    grid[row][col].letter = letter;
+                    
+                    // Input maydonini yangilash
+                    const input = document.querySelector(`input[data-row="${row}"][data-col="${col}"]`);
+                    if (input) {
+                        input.value = letter;
+                    }
+                    
+                    // Savollarni tugallanganini tekshirish
+                    checkAllClues();
+                } else {
+                    alert('Bu savol to\'g\'ri to\'ldirilgan!');
+                }
+            }
+        } else {
+            alert('Iltimos, avval savolni tanlang.');
+        }
+    }
+    
+    // Krossvordni qayta boshlash
+    function resetCrossword() {
+        if (confirm('Haqiqatan ham krossvordni qayta boshlamoqchimisiz?')) {
+            // Barcha kataklarni tozalash
+            for (let i = 0; i < height; i++) {
+                for (let j = 0; j < width; j++) {
+                    if (grid[i][j].isActive) {
+                        grid[i][j].letter = '';
+                    }
+                }
+            }
+            
+            // Input maydonlarini tozalash
+            document.querySelectorAll('.cell input').forEach(input => {
+                input.value = '';
+            });
+            
+            // Savollardan belgilarni olib tashlash
+            document.querySelectorAll('.clue-item').forEach(item => {
+                item.classList.remove('completed', 'active');
+            });
+            
+            // Joriy savolni bekor qilish
+            currentClueId = null;
+        }
+    }
+    
+    // Savol elementlari bosilganda
+    acrossClues.forEach(clueElement => {
+        clueElement.addEventListener('click', () => {
+            const clueId = parseInt(clueElement.dataset.id);
+            const row = parseInt(clueElement.dataset.row);
+            const col = parseInt(clueElement.dataset.col);
+            
+            selectClue(clueId, 'across');
+            
+            // Birinchi katakka fokus qilish
+            const input = document.querySelector(`input[data-row="${row}"][data-col="${col}"]`);
+            if (input) {
+                input.focus();
+            }
+        });
+    });
+    
+    downClues.forEach(clueElement => {
+        clueElement.addEventListener('click', () => {
+            const clueId = parseInt(clueElement.dataset.id);
+            const row = parseInt(clueElement.dataset.row);
+            const col = parseInt(clueElement.dataset.col);
+            
+            selectClue(clueId, 'down');
+            
+            // Birinchi katakka fokus qilish
+            const input = document.querySelector(`input[data-row="${row}"][data-col="${col}"]`);
+            if (input) {
+                input.focus();
+            }
+        });
+    });
+    
+    // Tugmachalar
+    checkButton.addEventListener('click', checkAnswers);
+    hintButton.addEventListener('click', showHint);
+    resetButton.addEventListener('click', resetCrossword);
+    
+    // Krossvordni boshlash
+    initializeGrid();
+});
+</script>
+{% endblock %}
+{% endblock %}

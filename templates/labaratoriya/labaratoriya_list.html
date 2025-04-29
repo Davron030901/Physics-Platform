@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Laboratoriya ishlari{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>Laboratoriya ishlari</h2>
+            <p class="lead">Fizika fanidan laboratoriya ishlari va simulyatsiyalar</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_authenticated and user.profile.role == 'teacher' %}
+            <a href="{% url 'labaratoriya_create' %}" class="btn btn-info">
+                <i class="fas fa-plus"></i> Yangi ish qo'shish
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        {% if labs %}
+            {% for lab in labs %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">{{ lab.title }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ lab.description|truncatewords:20 }}</p>
+                        {% if lab.simulation_url %}
+                        <div class="mb-2">
+                            <span class="badge bg-success"><i class="fas fa-desktop me-1"></i> Simulyatsiya mavjud</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <a href="{% url 'labaratoriya_detail' lab.id %}" class="btn btn-sm btn-info">
+                            <i class="fas fa-eye"></i> Ko'rish
+                        </a>
+                        {% if lab.file %}
+                        <a href="{{ lab.file.url }}" class="btn btn-sm btn-outline-secondary" download>
+                            <i class="fas fa-download"></i> Yuklab olish
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Hozircha laboratoriya ishlari mavjud emas.
+                </div>
+                {% if user.is_authenticated and user.profile.role == 'teacher' %}
+                <a href="{% url 'labaratoriya_create' %}" class="btn btn-info mt-3">
+                    <i class="fas fa-plus"></i> Birinchi laboratoriya ishini qo'shing
+                </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

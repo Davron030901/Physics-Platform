@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ task.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>{{ task.title }}</h2>
+            <p class="text-muted">
+                <i class="fas fa-user me-1"></i> {{ task.teacher.get_full_name|default:task.teacher.username }}
+                <span class="mx-2">|</span>
+                <i class="fas fa-calendar me-1"></i> {{ task.created_at|date:"d.m.Y" }}
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_authenticated and user == task.teacher or user.is_staff %}
+            <div class="btn-group">
+                <a href="{% url 'amaliy_edit' task.id %}" class="btn btn-outline-primary">
+                    <i class="fas fa-edit me-1"></i> Tahrirlash
+                </a>
+                <a href="{% url 'amaliy_delete' task.id %}" class="btn btn-outline-danger">
+                    <i class="fas fa-trash me-1"></i> O'chirish
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Amaliy mashg'ulot haqida</h5>
+                    <p class="card-text">{{ task.description|linebreaks }}</p>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-tasks me-2"></i> Masala matni</h5>
+                </div>
+                <div class="card-body">
+                    {% if task.google_docs_url %}
+                        <div class="ratio ratio-16x9 mb-3">
+                            <iframe src="{{ task.google_docs_url }}" allowfullscreen></iframe>
+                        </div>
+                    {% else %}
+                        <div class="problem-text">
+                            {{ task.problem_text|linebreaks }}
+                        </div>
+                        {% if task.image %}
+                        <div class="text-center my-4">
+                            <img src="{{ task.image.url }}" alt="{{ task.title }}" class="img-fluid rounded" style="max-height: 400px;">
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% if task.solution %}
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i> Yechim</h5>
+                </div>
+                <div class="card-body">
+                    {{ task.solution|linebreaks }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle me-2"></i> Qo'shimcha ma'lumot</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Yuklangan sana</span>
+                            <span>{{ task.created_at|date:"d.m.Y" }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Oxirgi yangilanish</span>
+                            <span>{{ task.updated_at|date:"d.m.Y" }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>O'qituvchi</span>
+                            <span>{{ task.teacher.get_full_name|default:task.teacher.username }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pagination for multiple tasks -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="Amaliy mashg'ulot sahifalari">
+                <ul class="pagination justify-content-center">
+                    {% if prev_task %}
+                    <li class="page-item">
+                        <a class="page-link" href="{% url 'amaliy_detail' prev_task.id %}">
+                            <i class="fas fa-chevron-left me-1"></i> Oldingi mashg'ulot
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="fas fa-chevron-left me-1"></i> Oldingi mashg'ulot</span>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="page-item">
+                        <a class="page-link" href="{% url 'amaliy_list' %}">
+                            <i class="fas fa-th-list me-1"></i> Barcha mashg'ulotlar
+                        </a>
+                    </li>
+                    
+                    {% if next_task %}
+                    <li class="page-item">
+                        <a class="page-link" href="{% url 'amaliy_detail' next_task.id %}">
+                            Keyingi mashg'ulot <i class="fas fa-chevron-right ms-1"></i>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Keyingi mashg'ulot <i class="fas fa-chevron-right ms-1"></i></span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}

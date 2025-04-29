@@ -1,0 +1,547 @@
+<!-- templates/suzmetodi/suz_game.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Fizika so'z o'yini{% endblock %}
+
+{% block extra_css %}
+<style>
+    .word-game-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    
+    .word-box {
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+        margin-bottom: 20px;
+    }
+    
+    .word-display {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    
+    .letter-box {
+        width: 50px;
+        height: 50px;
+        margin: 0 5px;
+        border: 2px solid #0d6efd;
+        border-radius: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        font-weight: bold;
+        text-transform: uppercase;
+        background-color: #e9ecef;
+    }
+    
+    .letter-box.filled {
+        background-color: #d1e7ff;
+    }
+    
+    .letter-bank {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .letter {
+        width: 40px;
+        height: 40px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        background-color: #e9ecef;
+        transition: all 0.2s;
+    }
+    
+    .letter:hover {
+        background-color: #d1e7ff;
+        transform: translateY(-2px);
+    }
+    
+    .letter.used {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .hint-text {
+        font-style: italic;
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+    
+    .timer-box {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .timer {
+        font-size: 24px;
+        font-weight: bold;
+        color: #0d6efd;
+    }
+    
+    .score-box {
+        text-align: center;
+        padding: 15px;
+        background-color: #e9ecef;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h2>Fizika terminlari so'z o'yini</h2>
+            <p class="lead">O'zbek tilidagi fizika terminlarini toping</p>
+        </div>
+    </div>
+    
+    {% if no_games %}
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Hozircha so'z o'yinlari mavjud emas. Tez orada qo'shiladi.
+                </div>
+                
+                <!-- Ma'mur uchun qo'shish tugmachasi -->
+                {% if user.is_staff %}
+                    <div class="text-center mt-3">
+                        <a href="{% url 'admin:krossvord_wordgame_add' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Yangi so'z o'yini qo'shish
+                        </a>
+                    </div>
+                {% endif %}
+                
+                <!-- Namunaviy o'yin -->
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">So'z o'yini namunasi</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="word-game-container">
+                            <div class="word-box">
+                                <h5 class="text-center mb-4">Savol: Jismlarning o'zaro ta'sirini qaysi fizik kattalik xarakterlaydi?</h5>
+                                
+                                <div class="word-display">
+                                    <div class="letter-box">K</div>
+                                    <div class="letter-box">U</div>
+                                    <div class="letter-box">C</div>
+                                    <div class="letter-box">H</div>
+                                </div>
+                                
+                                <div class="hint-text text-center">
+                                    <i class="fas fa-lightbulb me-1"></i> Yordam: Nyuton qonunlarida asosiy tushuncha
+                                </div>
+                                
+                                <div class="letter-bank">
+                                    <div class="letter">A</div>
+                                    <div class="letter">B</div>
+                                    <div class="letter">C</div>
+                                    <div class="letter">D</div>
+                                    <div class="letter">E</div>
+                                    <div class="letter">F</div>
+                                    <div class="letter">G</div>
+                                    <div class="letter">H</div>
+                                    <div class="letter">I</div>
+                                    <div class="letter">J</div>
+                                    <div class="letter">K</div>
+                                    <div class="letter">L</div>
+                                    <div class="letter">M</div>
+                                    <div class="letter">N</div>
+                                    <div class="letter">O</div>
+                                    <div class="letter">P</div>
+                                    <div class="letter">Q</div>
+                                    <div class="letter">R</div>
+                                    <div class="letter">S</div>
+                                    <div class="letter">T</div>
+                                    <div class="letter">U</div>
+                                    <div class="letter">V</div>
+                                    <div class="letter">X</div>
+                                    <div class="letter">Y</div>
+                                    <div class="letter">Z</div>
+                                    <div class="letter">O'</div>
+                                    <div class="letter">G'</div>
+                                    <div class="letter">SH</div>
+                                    <div class="letter">CH</div>
+                                </div>
+                                
+                                <div class="timer-box">
+                                    <p>Qolgan vaqt: <span class="timer">60</span> sekund</p>
+                                </div>
+                            </div>
+                            
+                            <div class="score-box">
+                                <h5>Ball: <span class="score">0</span></h5>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                                <button class="btn btn-primary">
+                                    <i class="fas fa-redo me-1"></i> Yangi so'z
+                                </button>
+                                <button class="btn btn-info">
+                                    <i class="fas fa-lightbulb me-1"></i> Yordam
+                                </button>
+                                <button class="btn btn-danger">
+                                    <i class="fas fa-times me-1"></i> Tozalash
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="word-game-container">
+                            <div class="word-box">
+                                <h5 class="text-center mb-4">Savol: {{ game.question }}</h5>
+                                
+                                <div class="word-display" id="word-display">
+                                    <!-- JavaScript orqali to'ldiriladi -->
+                                </div>
+                                
+                                <div class="hint-text text-center" id="hint-text">
+                                    {% if game.hint %}
+                                    <i class="fas fa-lightbulb me-1"></i> Yordam: {{ game.hint }}
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="letter-bank" id="letter-bank">
+                                    <!-- JavaScript orqali to'ldiriladi -->
+                                </div>
+                                
+                                <div class="timer-box">
+                                    <p>Qolgan vaqt: <span class="timer" id="timer">60</span> sekund</p>
+                                </div>
+                            </div>
+                            
+                            <div class="score-box">
+                                <h5>Ball: <span class="score" id="score">0</span></h5>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                                <button id="new-word-btn" class="btn btn-primary">
+                                    <i class="fas fa-redo me-1"></i> Yangi so'z
+                                </button>
+                                <button id="hint-btn" class="btn btn-info">
+                                    <i class="fas fa-lightbulb me-1"></i> Yordam
+                                </button>
+                                <button id="clear-btn" class="btn btn-danger">
+                                    <i class="fas fa-times me-1"></i> Tozalash
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal -->
+        <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" id="result-header">
+                        <h5 class="modal-title" id="resultModalLabel">Natija</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="result-body">
+                        <!-- JavaScript orqali to'ldiriladi -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Yopish</button>
+                        <button type="button" class="btn btn-primary" id="next-word-btn">Keyingi so'z</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+{% if not no_games %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // O'yin ma'lumotlari
+        const gameData = {
+            id: {{ game.id }},
+            question: "{{ game.question|escapejs }}",
+            answer: "{{ game.answer|upper|escapejs }}",
+            hint: "{{ game.hint|escapejs }}"
+        };
+        
+        // O'zgaruvchilar
+        let score = 0;
+        let timeLeft = 60;
+        let timer;
+        let currentWord = [];
+        let selectedLetters = [];
+        
+        // DOM elementlari
+        const wordDisplay = document.getElementById('word-display');
+        const letterBank = document.getElementById('letter-bank');
+        const timerElement = document.getElementById('timer');
+        const scoreElement = document.getElementById('score');
+        const hintElement = document.getElementById('hint-text');
+        const newWordBtn = document.getElementById('new-word-btn');
+        const hintBtn = document.getElementById('hint-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
+        const nextWordBtn = document.getElementById('next-word-btn');
+        
+        // O'yinni boshlash
+        initializeGame();
+        
+        // O'yin elementlarini yaratish
+        function initializeGame() {
+            // So'zni ko'rsatish
+            displayWord();
+            
+            // Harflar bankini yaratish
+            createLetterBank();
+            
+            // Taymer
+            startTimer();
+            
+            // Tugmachalarni sozlash
+            setupButtons();
+            
+            // Score ni ko'rsatish
+            updateScore();
+        }
+        
+        // So'zni ko'rsatish
+        function displayWord() {
+            wordDisplay.innerHTML = '';
+            
+            // Har bir harf uchun katak yaratish
+            for (let i = 0; i < gameData.answer.length; i++) {
+                const letterBox = document.createElement('div');
+                letterBox.className = 'letter-box';
+                letterBox.dataset.index = i;
+                
+                if (selectedLetters[i]) {
+                    letterBox.textContent = selectedLetters[i];
+                    letterBox.classList.add('filled');
+                }
+                
+                wordDisplay.appendChild(letterBox);
+                currentWord[i] = selectedLetters[i] || '';
+            }
+        }
+        
+        // Harflar bankini yaratish
+        function createLetterBank() {
+            letterBank.innerHTML = '';
+            
+            // O'zbek alifbosi harflari
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVXYZ'O'G'SHCH";
+            
+            // Harflarni yaratish
+            for (let i = 0; i < alphabet.length; i++) {
+                const letterDiv = document.createElement('div');
+                letterDiv.className = 'letter';
+                letterDiv.textContent = alphabet[i];
+                
+                // Harf bosilganda
+                letterDiv.addEventListener('click', () => selectLetter(alphabet[i]));
+                
+                letterBank.appendChild(letterDiv);
+            }
+        }
+        
+        // Harfni tanlash
+        function selectLetter(letter) {
+            // Bo'sh joyni topish
+            const emptyIndex = currentWord.findIndex(l => l === '');
+            
+            if (emptyIndex !== -1) {
+                // Harfni qo'shish
+                currentWord[emptyIndex] = letter;
+                selectedLetters[emptyIndex] = letter;
+                
+                // So'zni yangilash
+                displayWord();
+                
+                // Agar so'z to'ldirilgan bo'lsa
+                if (!currentWord.includes('')) {
+                    checkAnswer();
+                }
+            }
+        }
+        
+        // Javobni tekshirish
+        function checkAnswer() {
+            const userAnswer = currentWord.join('');
+            
+            // To'g'ri javob
+            if (userAnswer === gameData.answer) {
+                clearInterval(timer);
+                score += 10;
+                updateScore();
+                showResult(true);
+            } else {
+                // Noto'g'ri javob
+                showResult(false);
+            }
+        }
+        
+        // Natijani ko'rsatish
+        function showResult(isCorrect) {
+            const resultHeader = document.getElementById('result-header');
+            const resultBody = document.getElementById('result-body');
+            
+            if (isCorrect) {
+                resultHeader.className = 'modal-header bg-success text-white';
+                resultHeader.innerHTML = '<h5 class="modal-title">Tabriklaymiz!</h5>';
+                resultBody.innerHTML = `
+                    <div class="text-center">
+                        <h4 class="mb-3">Siz to'g'ri topdingiz!</h4>
+                        <p>So'z: <strong>${gameData.answer}</strong></p>
+                        <p>+10 ball qo'shildi</p>
+                    </div>
+                `;
+            } else {
+                resultHeader.className = 'modal-header bg-danger text-white';
+                resultHeader.innerHTML = '<h5 class="modal-title">Afsus!</h5>';
+                resultBody.innerHTML = `
+                    <div class="text-center">
+                        <h4 class="mb-3">Noto'g'ri javob</h4>
+                        <p>Qayta urinib ko'ring</p>
+                    </div>
+                `;
+                
+                // Javobni tozalash
+                clearAnswer();
+            }
+            
+            resultModal.show();
+        }
+        
+        // Vaqtni boshlash
+        function startTimer() {
+            clearInterval(timer);
+            timeLeft = 60;
+            timerElement.textContent = timeLeft;
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+                
+                if (timeLeft <= 10) {
+                    timerElement.style.color = 'red';
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    showTimeUpResult();
+                }
+            }, 1000);
+        }
+        
+        // Vaqt tugaganda
+        function showTimeUpResult() {
+            const resultHeader = document.getElementById('result-header');
+            const resultBody = document.getElementById('result-body');
+            
+            resultHeader.className = 'modal-header bg-warning text-dark';
+            resultHeader.innerHTML = '<h5 class="modal-title">Vaqt tugadi!</h5>';
+            resultBody.innerHTML = `
+                <div class="text-center">
+                    <h4 class="mb-3">Vaqtingiz tugadi</h4>
+                    <p>To'g'ri javob: <strong>${gameData.answer}</strong></p>
+                </div>
+            `;
+            
+            resultModal.show();
+        }
+        
+        // Tugmachalarni sozlash
+        function setupButtons() {
+            // Yangi so'z
+            newWordBtn.addEventListener('click', () => {
+                location.reload();
+            });
+            
+            // Yordam
+            hintBtn.addEventListener('click', showHint);
+            
+            // Tozalash
+            clearBtn.addEventListener('click', clearAnswer);
+            
+            // Keyingi so'z
+            nextWordBtn.addEventListener('click', () => {
+                location.reload();
+            });
+        }
+        
+        // Yordam ko'rsatish
+        function showHint() {
+            // Yordam matni
+            if (gameData.hint) {
+                hintElement.innerHTML = `<i class="fas fa-lightbulb me-1"></i> Yordam: ${gameData.hint}`;
+            } else {
+                // Tasodifiy harfni ko'rsatish
+                const emptyIndices = [];
+                
+                for (let i = 0; i < gameData.answer.length; i++) {
+                    if (!selectedLetters[i]) {
+                        emptyIndices.push(i);
+                    }
+                }
+                
+                if (emptyIndices.length > 0) {
+                    const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+                    currentWord[randomIndex] = gameData.answer[randomIndex];
+                    selectedLetters[randomIndex] = gameData.answer[randomIndex];
+                    
+                    // So'zni yangilash
+                    displayWord();
+                    
+                    // Agar so'z to'ldirilgan bo'lsa
+                    if (!currentWord.includes('')) {
+                        checkAnswer();
+                    }
+                }
+            }
+            
+            // Ball kamaytirish
+            score = Math.max(0, score - 2);
+            updateScore();
+        }
+        
+        // Javobni tozalash
+        function clearAnswer() {
+            selectedLetters = [];
+            currentWord = Array(gameData.answer.length).fill('');
+            displayWord();
+        }
+        
+        // Ballni yangilash
+        function updateScore() {
+            scoreElement.textContent = score;
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ video.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>{{ video.title }}</h2>
+            <p class="text-muted">
+                <i class="fas fa-calendar me-1"></i> {{ video.created_at|date:"d.m.Y" }}
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'video_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Barcha videolar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body p-0">
+                    <div class="ratio ratio-16x9">
+                        <iframe src="{{ video.get_embedded_url }}" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> Video haqida</h5>
+                </div>
+                <div class="card-body">
+                    {{ video.description|linebreaks }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-film me-2"></i> Boshqa videolar</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for related_video in related_videos %}
+                        <a href="{% url 'video_detail' related_video.id %}" class="list-group-item list-group-item-action">
+                            <div class="row g-0">
+                                <div class="col-4">
+                                    {% if related_video.thumbnail %}
+                                    <img src="{{ related_video.thumbnail.url }}" alt="{{ related_video.title }}" class="img-fluid" style="height: 80px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 80px;">
+                                        <i class="fas fa-play-circle fa-2x text-muted"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-8">
+                                    <h6 class="mb-1">{{ related_video.title|truncatechars:40 }}</h6>
+                                    <small class="text-muted">{{ related_video.created_at|date:"d.m.Y" }}</small>
+                                </div>
+                            </div>
+                        </a>
+                        {% empty %}
+                        <div class="list-group-item">
+                            <p class="text-muted mb-0">Boshqa videolar mavjud emas.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

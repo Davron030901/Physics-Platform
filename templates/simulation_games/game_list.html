@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Simulyatsion o'yinlar{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>Qiziqarli fizik simulyatsion o'yinlar</h2>
+            <p class="lead">Fizika qonunlarini interaktiv o'yinlar orqali o'rganing</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_staff %}
+            <a href="{% url 'game_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Yangi o'yin qo'shish
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        {% if games %}
+            {% for game in games %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    {% if game.thumbnail %}
+                    <img src="{{ game.thumbnail.url }}" class="card-img-top" alt="{{ game.title }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="fas fa-gamepad fa-4x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ game.title }}</h5>
+                        <p class="card-text">{{ game.description|truncatewords:20 }}</p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <a href="{% url 'game_detail' game.id %}" class="btn btn-primary">
+                            <i class="fas fa-play me-1"></i> O'ynash
+                        </a>
+                        {% if user.is_staff %}
+                        <div class="btn-group">
+                            <a href="{% url 'game_edit' game.id %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'game_delete' game.id %}" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Hozircha simulyatsion o'yinlar mavjud emas.
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Tavsiya etilgan simulyatsion o'yinlar</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>PhET Interactive Simulations loyihasi fizika, kimyo, biologiya, Yer fanlari va matematika bo'yicha bepul interaktiv simulyatsiyalarni taqdim etadi.</p>
+                        <a href="https://phet.colorado.edu/uz/simulations/category/physics" class="btn btn-primary" target="_blank">
+                            <i class="fas fa-external-link-alt me-1"></i> PhET Simulyatsiyalari
+                        </a>
+                    </div>
+                </div>
+                
+                {% if user.is_staff %}
+                <a href="{% url 'game_create' %}" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus me-1"></i> Birinchi o'yinni qo'shing
+                </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> Simulyatsion o'yinlar haqida</h5>
+                </div>
+                <div class="card-body">
+                    <p>Simulyatsion o'yinlar - bu fizika qonunlarini interaktiv tarzda o'rganish imkonini beruvchi dasturiy vositalar. Ular orqali quyidagi mavzularni o'rganish mumkin:</p>
+                    <ul>
+                        <li>Mexanika (harakatlar, kuchlar, to'qnashuvlar)</li>
+                        <li>Energiya va ish</li>
+                        <li>Elektr va magnit maydonlari</li>
+                        <li>Yorug'lik va optika</li>
+                        <li>Atom fizikasi va kvant mexanikasi</li>
+                    </ul>
+                    
+                    <div class="alert alert-success mt-3">
+                        <i class="fas fa-lightbulb me-2"></i> <strong>Maslahat:</strong> Simulyatsiyalardan foydalanish fizika qonunlarini aniq tasavvur qilish va tushunishga yordam beradi.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

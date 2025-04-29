@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ game.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>{{ game.title }}</h2>
+            <p class="text-muted">
+                <i class="fas fa-calendar me-1"></i> {{ game.created_at|date:"d.m.Y" }}
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'game_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Barcha o'yinlar
+            </a>
+            {% if user.is_staff %}
+            <div class="btn-group ms-2">
+                <a href="{% url 'game_edit' game.id %}" class="btn btn-outline-primary">
+                    <i class="fas fa-edit me-1"></i> Tahrirlash
+                </a>
+                <a href="{% url 'game_delete' game.id %}" class="btn btn-outline-danger">
+                    <i class="fas fa-trash me-1"></i> O'chirish
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">O'yin haqida</h5>
+                    <p class="card-text">{{ game.description|linebreaks }}</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-gamepad me-2"></i> Simulyatsiya</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="ratio ratio-16x9 bg-light">
+                        <iframe src="{{ game.iframe_url }}" allowfullscreen="true" frameborder="0" style="width:100%; height:600px;"></iframe>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ game.iframe_url }}" class="btn btn-outline-primary" target="_blank">
+                        <i class="fas fa-external-link-alt me-1"></i> To'liq ekranda ochish
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            {% if game.thumbnail %}
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <img src="{{ game.thumbnail.url }}" alt="{{ game.title }}" class="img-fluid rounded">
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle me-2"></i> Qo'shimcha ma'lumot</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Qo'shilgan sana</span>
+                            <span>{{ game.created_at|date:"d.m.Y" }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Oxirgi yangilanish</span>
+                            <span>{{ game.updated_at|date:"d.m.Y" }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Qo'shgan foydalanuvchi</span>
+                            <span>{{ game.added_by.get_full_name|default:game.added_by.username }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-share-alt me-2"></i> Do'stlaringiz bilan ulashing</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="d-grid gap-2">
+                        <a href="https://t.me/share/url?url={{ request.build_absolute_uri }}&text={{ game.title }}" class="btn btn-info" target="_blank">
+                            <i class="fab fa-telegram me-1"></i> Telegram
+                        </a>
+                        <a href="https://facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" class="btn btn-primary" target="_blank">
+                            <i class="fab fa-facebook me-1"></i> Facebook
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

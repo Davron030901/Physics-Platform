@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Test natijalari{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h2>Test yakunlandi!</h2>
+            <p class="lead">Natijalaringiz bilan tanishing</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-pie me-2"></i> Natijalar</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded mb-3">
+                                <h3 class="text-primary">{{ correct_count }}/{{ total_questions }}</h3>
+                                <p class="mb-0">To'g'ri javoblar</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded mb-3">
+                                <h3 class="text-success">{{ percentage }}%</h3>
+                                <p class="mb-0">O'zlashtirish</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded mb-3">
+                                <h3 class="{% if percentage >= 70 %}text-success{% else %}text-danger{% endif %}">{{ grade }}</h3>
+                                <p class="mb-0">Baho</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar {% if percentage >= 70 %}bg-success{% elif percentage >= 60 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                 role="progressbar" 
+                                 style="width: {{ percentage }}%" 
+                                 aria-valuenow="{{ percentage }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                {{ percentage }}%
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Javoblar ro'yxati -->
+                    <div class="mt-4">
+                        <h5>Sizning javoblaringiz:</h5>
+                        <div class="list-group">
+                            {% for answer in user_answers %}
+                            <div class="list-group-item {% if answer.is_correct %}list-group-item-success{% else %}list-group-item-danger{% endif %}">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ answer.question.text }}</h6>
+                                    <small>{% if answer.is_correct %}✓ To'g'ri{% else %}✗ Noto'g'ri{% endif %}</small>
+                                </div>
+                                <p class="mb-1">Siz tanladingiz: {{ answer.choice.text }}</p>
+                                {% if not answer.is_correct %}
+                                <small class="text-muted">To'g'ri javob: 
+                                    {% for choice in answer.question.choices.all %}
+                                        {% if choice.is_correct %}{{ choice.text }}{% endif %}
+                                    {% endfor %}
+                                </small>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center mb-4">
+                <a href="{% url 'test_list' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-redo me-1"></i> Boshqa testni ishlash
+                </a>
+                <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-home me-1"></i> Bosh sahifa
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
