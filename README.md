@@ -1,5 +1,4 @@
-![image](https://github.com/user-attachments/assets/b0f3bb5e-d219-4076-a90e-161aaca9afd2)![image](https://github.com/user-attachments/assets/42f831c2-d6b8-4d4e-aee8-5399315a8504)Fizika Ta'lim Platformasi
-O'zbek tilidagi fizika o'qituvchilari va o'quvchilari uchun zamonaviy ta'lim platformasi.
+![image](https://github.com/user-attachments/assets/b0f3bb5e-d219-4076-a90e-161aaca9afd2)!
 ![image](https://github.com/user-attachments/assets/02facae7-121f-4817-8ee9-d595c429e8c7)
 
 🌟 Loyiha haqida
