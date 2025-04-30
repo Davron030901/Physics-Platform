@@ -1,5 +1,6 @@
-![image](https://github.com/user-attachments/assets/b0f3bb5e-d219-4076-a90e-161aaca9afd2)!
-![image](https://github.com/user-attachments/assets/02facae7-121f-4817-8ee9-d595c429e8c7)
+
+![Bosh sahifa](https://github.com/user-attachments/assets/02facae7-121f-4817-8ee9-d595c429e8c7)
+![davomi](https://github.com/user-attachments/assets/9d50c693-7074-463f-8b2e-7f2b7e31fb8b)
 
 🌟 Loyiha haqida
 Ushbu platforma fizika fanini o'rganish va o'qitishni osonlashtirish uchun yaratilgan. Platformada quyidagi imkoniyatlar mavjud:
